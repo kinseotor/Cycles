@@ -27,9 +27,9 @@ class WebGPURenderer {
     static alphaMode = this.config.alphaModeList[ 1 ];
     static depthFormat = this.config.depthFormatList[0];
         
-    static RENDER_CONFIG_SLOT_SIZE = 256; // ≥ minUniformBufferOffsetAlignment
+    static DynamicOffset_SLOT_SIZE = 256; // ≥ minUniformBufferOffsetAlignment
     static RENDER_STRUCT_COUNT = 4 * 4 *2;
-    static RENDER_COUNT = 16;
+    static DRAW_CALL_COUNT = 100;
 
 
     static shaderCode = {
@@ -42,10 +42,10 @@ class WebGPURenderer {
     }
     
     static Pipelinelist = {
-        BasicMaterial: null,
-        BlinnPongMaterial: null,
-        CartoonMaterial: null,
-        NormalMaterial: null,
+        // BasicMaterial: null,
+        // BlinnPongMaterial: null,
+        // CartoonMaterial: null,
+        // NormalMaterial: null,
     }
     
     static BindGrouplayout = {
@@ -92,12 +92,30 @@ class WebGPURenderer {
         WebGPURenderer.gpu = navigator.gpu;
         WebGPURenderer.format = WebGPURenderer.gpu.getPreferredCanvasFormat();
         try {
-            WebGPURenderer.adapter = await WebGPURenderer.gpu.requestAdapter();
+            WebGPURenderer.adapter = await WebGPURenderer.gpu.requestAdapter({
+                // powerPreference: 'high-performance',
+                // powerPreference: 'low-power',
+            });
+            // const info = WebGPURenderer.adapter.info;
+            // console.log("GPU信息：", info);
             if (!WebGPURenderer.adapter) {
                 console.warn('Couldn’t request WebGPU adapter.');
                 return WebGPURenderer.status.isInitGraphicsApied;
             }
-            WebGPURenderer.device = await WebGPURenderer.adapter.requestDevice();
+            WebGPURenderer.device = await WebGPURenderer.adapter.requestDevice({
+                // 我这个引擎必须要有这些硬件能力、内存限制，缺任意一项，直接拒绝创建 device
+                requiredFeatures: [
+                    "bgra8unorm-storage",        // BGRA8纹理可以作为存储纹理（storage texture），常用于后处理、离屏渲染。很多手机GPU默认不开放这个能力，需要显式申请
+                    "depth-clip-control",        // 深度裁剪控制，可以关闭深度裁剪，实现超出远近裁剪面的几何体渲染，做阴影、天空、特效常用
+                    "depth32float-stencil8",     // 32位浮点数深度 + 8位模板缓冲 合并纹理，高精度深度，做阴影、SSAO、复杂模板特效必备
+                    "indirect-first-instance",   // 间接绘制支持first-instance。多实例间接渲染，批量渲染大量物体（草地、粒子），减少CPU提交开销，自研引擎优化利器
+                    "rg11b10ufloat-renderable",  // 11/11/10 半浮点HDR颜色纹理，可直接渲染。用于HDR颜色缓冲，比RGBA16float省一半显存
+                ],
+                requiredLimits: {
+                    minUniformBufferOffsetAlignment: 256,
+                    maxStorageBufferBindingSize: this.adapter.limits.maxStorageBufferBindingSize
+                }
+            });
             WebGPURenderer.status.isInitGraphicsApi = true;
         } catch (error) {
             console.warn('WebGPU init reject:', error);
@@ -129,11 +147,46 @@ class WebGPURenderer {
     // }
 
     static async createPipelines() {
+        // skybox
+        this.Pipelinelist.Skybox = await RenderPipeline.createVertexUvNormalPipeline({
+            label: 'SkyBox',
+            vertexShaderModule: WebGPURenderer.shaderModule.default,
+            fragmentShaderModule: WebGPURenderer.shaderModule.default,
+            vs_name: 'vs_VertexUvNormal',
+            fs_name: 'fs_BasicMaterial',
+            bindGroupLayouts: [
+                WebGPURenderer.BindGrouplayout._0,
+                WebGPURenderer.BindGrouplayout._1,
+                WebGPURenderer.BindGrouplayout._2,
+            ],
+            primitive: {
+                topology: WebGPURenderer.config.topologyTypeList[3],
+                cullMode: 'back',
+                frontFace: 'ccw'
+            },
+            depthStencil: {
+                format: WebGPURenderer.depthFormat,
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+            },
+            multisample: {
+                count: WebGPURenderer.config.sampleCount,
+                mask: 0xFFFFFFFF,
+                alphaToCoverageEnabled: false
+            }
+        });
 
         // BasicMaterial
         this.Pipelinelist.BasicMaterial = await RenderPipeline.createVertexUvNormalPipeline({
+            vertexShaderModule: WebGPURenderer.shaderModule.default,
+            fragmentShaderModule: WebGPURenderer.shaderModule.default,
             vs_name: 'vs_VertexUvNormal',
             fs_name: 'fs_BasicMaterial',
+            bindGroupLayouts: [
+                WebGPURenderer.BindGrouplayout._0,
+                WebGPURenderer.BindGrouplayout._1,
+                WebGPURenderer.BindGrouplayout._2,
+            ],
             primitive: {
                 topology: WebGPURenderer.config.topologyTypeList[3],
                 cullMode: 'back',
@@ -151,8 +204,15 @@ class WebGPURenderer {
             }
         });
         this.Pipelinelist.UI = await RenderPipeline.createVertexUvNormalPipeline({
+            vertexShaderModule: WebGPURenderer.shaderModule.default,
+            fragmentShaderModule: WebGPURenderer.shaderModule.default,
             vs_name: 'vs_VertexUvNormal',
             fs_name: 'fs_BasicMaterial',
+            bindGroupLayouts: [
+                WebGPURenderer.BindGrouplayout._0,
+                WebGPURenderer.BindGrouplayout._1,
+                WebGPURenderer.BindGrouplayout._2,
+            ],
             primitive: {
                 topology: WebGPURenderer.config.topologyTypeList[3],
                 cullMode: 'back',
@@ -166,8 +226,15 @@ class WebGPURenderer {
         });
         // line
         this.Pipelinelist.Line = await RenderPipeline.createVertexUvNormalPipeline({
+            vertexShaderModule: WebGPURenderer.shaderModule.default,
+            fragmentShaderModule: WebGPURenderer.shaderModule.default,
             vs_name: 'vs_Line',
             fs_name: 'fs_Line',
+            bindGroupLayouts: [
+                WebGPURenderer.BindGrouplayout._0,
+                WebGPURenderer.BindGrouplayout._1,
+                WebGPURenderer.BindGrouplayout._2,
+            ],
             primitive: {
                 topology: WebGPURenderer.config.topologyTypeList[1],
                 cullMode: 'back',
@@ -186,7 +253,7 @@ class WebGPURenderer {
         });
         WebGPURenderer.status.isCreatePipelinesed = true;
         this.initDataResource();
-        console.log(WebGPURenderer.device.limits)
+        console.log(WebGPURenderer.Pipelinelist)
         return this;
     }
 
@@ -283,7 +350,7 @@ class WebGPURenderer {
 
         this.Resource.Uniform._ = this.device.createBuffer({
             label: 'ubo-dynamic',
-            size: WebGPURenderer.RENDER_CONFIG_SLOT_SIZE * WebGPURenderer.RENDER_COUNT,
+            size: WebGPURenderer.DynamicOffset_SLOT_SIZE * WebGPURenderer.DRAW_CALL_COUNT,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
         
@@ -354,7 +421,7 @@ class WebGPURenderer {
                         resource: {
                             buffer: this.Resource.Uniform._,
                             offset: 0,
-                            size: WebGPURenderer.RENDER_CONFIG_SLOT_SIZE,   // ← 关键：一个槽位的大小
+                            size: WebGPURenderer.DynamicOffset_SLOT_SIZE,   // ← 关键：一个槽位的大小
                         },
                     }
                 ]

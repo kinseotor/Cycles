@@ -48,8 +48,8 @@ function CameraCtrl(x, y) {
 }
 
 function touchMove(x, y) {
-    node8.position.x += x*2;
-    node8.position.z += y*2;
+    node8.position.x += x;
+    node8.position.z += y;
 }
 
 function viewCtrl(x, y) {
@@ -58,7 +58,7 @@ function viewCtrl(x, y) {
 }
 
 const sprite = new Cycles.Plane()
-sprite.setShape(100,100);
+sprite.setShape(200,200);
 sprite.updateAttribute();
 
 const cube = new Cycles.Cube()
@@ -236,14 +236,24 @@ function render() {
     // View2D UI
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
         [
-            1, 8, 3, 3
+            1, 8, 5, 3
         ]
     ));
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
         [
-            200/4096, 200/4096, 1220/4096, 2/4096
+            1440/4096, 1440/4096, 0/4096, 0/4096
         ]
     ));
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
+    //     [
+    //         1, 8, 3, 3
+    //     ]
+    // ));
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
+    //     [
+    //         200/4096, 200/4096, 1220/4096, 2/4096
+    //     ]
+    // ));
     view_ui.drawGeometry(
         Cycles.WebGPURenderer.Pipelinelist.UI,
         sprite,
@@ -282,14 +292,16 @@ function animation() {
 // setInterval(render,2000)
 animation()
 
-new Cycles.Texture2D().url = '/assets/pmx/xd/颜.png';
-new Cycles.Texture2D().url = '/assets/pmx/xd/衣.png';
-new Cycles.Texture2D().url = '/assets/pmx/xd/髪.png';
-new Cycles.Texture2D().url = '/assets/binding/atlas/UI.png';
-new Cycles.Texture2D().url = '/assets/pmx/zgn/衣.png';
-new Cycles.Texture2D().url = '/assets/pmx/zgn/髪.png';
-new Cycles.Texture2D().url = '/assets/pmx/alxyyz/衣服.png';
-new Cycles.Texture2D().url = '/assets/pmx/alxyyz/头发.png';
+new Cycles.Texture2D().url = '../assets/pmx/xd/颜.png';
+new Cycles.Texture2D().url = '../assets/pmx/xd/衣.png';
+new Cycles.Texture2D().url = '../assets/pmx/xd/髪.png';
+new Cycles.Texture2D().url = '../assets/binding/atlas/UI.png';
+new Cycles.Texture2D().url = '../assets/images/brny.jpg';
+new Cycles.Texture2D().url = '../assets/images/file-7iowdg9qpgxs.jpg';
+new Cycles.Texture2D().url = '../assets/pmx/zgn/衣.png';
+new Cycles.Texture2D().url = '../assets/pmx/zgn/髪.png';
+new Cycles.Texture2D().url = '../assets/pmx/alxyyz/衣服.png';
+new Cycles.Texture2D().url = '../assets/pmx/alxyyz/头发.png';
 
 // const atlas1 = await Cycles.Loader.readText('/assets/binding/atlas/UI.array.json')
 // console.log(JSON.parse(atlas1))

@@ -152,7 +152,7 @@ class View extends ComponentBase {
     updateCamera() {
         if ( this.viewPort.status.needUpdate || this.camera.status.needUpdateProjectionMatrix4x4 ) {
             this.camera.aspect = this.viewPort.z/this.viewPort.w;
-            if ( this.camera.type === 'Orthographic') this.camera.orthoSize = this.viewPort.w;
+            if ( this.camera.type === 'Orthographic') this.camera.orthoSize = this.viewPort.w/2;
             this.camera.update();
             this.viewPort.status.needUpdate = false;
         }

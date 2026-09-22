@@ -33,13 +33,14 @@ class RenderPipeline {
             alphaToCoverageEnabled: false
         };
 
-        const pipelineLayout = WebGPURenderer.device.createPipelineLayout({
-            bindGroupLayouts: [
-                WebGPURenderer.BindGrouplayout._0,
-                WebGPURenderer.BindGrouplayout._1,
-                WebGPURenderer.BindGrouplayout._2,
-            ]
-        });
+        let pipelineLayout;
+        if (Array.isArray(config.bindGroupLayouts)) {
+            pipelineLayout = WebGPURenderer.device.createPipelineLayout({
+                bindGroupLayouts: config.bindGroupLayouts,
+            });
+        } else {
+            pipelineLayout = 'auto';
+        }
         
         return await WebGPURenderer.device.createRenderPipelineAsync({
             label: config.label,
