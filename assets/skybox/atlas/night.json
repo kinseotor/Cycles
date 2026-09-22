@@ -1,0 +1,60 @@
+{"frames": {
+
+"nx.jpg":
+{
+	"frame": {"x":1028,"y":2054,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+},
+"ny.jpg":
+{
+	"frame": {"x":1028,"y":1028,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+},
+"nz.jpg":
+{
+	"frame": {"x":2,"y":2054,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+},
+"px.jpg":
+{
+	"frame": {"x":2,"y":1028,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+},
+"py.jpg":
+{
+	"frame": {"x":1028,"y":2,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+},
+"pz.jpg":
+{
+	"frame": {"x":2,"y":2,"w":1024,"h":1024},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":1024,"h":1024},
+	"sourceSize": {"w":1024,"h":1024}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "night.png",
+	"format": "RGBA8888",
+	"size": {"w":2054,"h":3080},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:bc562ec7176535f947a71383e37aa16d$"
+}
+}

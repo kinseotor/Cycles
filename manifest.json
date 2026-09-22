@@ -1,0 +1,8 @@
+{
+    "version" : "2.0",
+    "name" : "Cycles",
+    "imports": {
+        "@cycles/core": "/src/Module.js",
+        "@cycles/input": "/src/input/Input.js"
+    }
+}

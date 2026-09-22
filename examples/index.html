@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="./init.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="importmap">
+        {
+            "imports": {
+                "@cycles/core": "../src/Module.js",
+                "@cycles/input": "../src/input/Input.js"
+            }
+        }
+    </script>
+    
+    <script type="module">
+
+        import * as Cycles from "@cycles/core"
+        import { Input } from "@cycles/input"
+
+        window.Cycles = Cycles;
+        window.Input = Input;
+        
+        const script_menu = [
+            './js/initRenderer.js',
+            './js/mikumiku.js',
+            './js/instance_render.js'
+        ]
+
+        function loadScript( index = 0 ) {
+            const script = document.createElement('script');
+            document.body.appendChild(script)
+            script.type = 'module';
+            script.src = script_menu[index];
+        }
+
+        Cycles.WebGPURenderer.init().then((r) => {
+            Cycles.WebGPURenderer.createPipelines().then(()=>{
+                loadScript( 0 );
+            })
+        });
+        
+    </script>
+</body>
+</html>

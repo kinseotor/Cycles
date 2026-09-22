@@ -1,0 +1,5 @@
+class Prefab {
+    
+}
+
+export { Prefab }

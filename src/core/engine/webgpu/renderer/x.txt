@@ -1,0 +1,256 @@
+
+        
+        WebGPURenderer.Pipelinelist.BlinnPongMaterial = await WebGPURenderer.device.createRenderPipelineAsync({
+            label: `2`,
+            layout: 'auto',
+            vertex: {
+                module: shaderModule,
+                entryPoint: "vsVertexUvNormal",
+                buffers: [
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 0,
+                                offset: 0,
+                                format: "float32x3"
+                            }
+                        ]
+                    },
+                    {
+                        arrayStride: 2 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 1,
+                                offset: 0,
+                                format: "float32x2"
+                            },
+                        ]
+                    },
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 2,
+                                offset: 0,
+                                format: "float32x3"
+                            },
+                        ]
+                    },
+                ]
+            },
+            fragment: {
+                module: shaderModule,
+                entryPoint: "fs_BlinnPongMaterial",
+                targets: [
+                    { 
+                        format: WebGPURenderer.format,
+                        blend: {
+                            color: {
+                                srcFactor: 'src-alpha',           // 源颜色乘以源alpha
+                                dstFactor: 'one-minus-src-alpha', // 目标颜色乘以(1-源alpha)
+                                operation: 'add'                  // 相加
+                            },
+                            alpha: {
+                                srcFactor: 'one',
+                                dstFactor: 'one-minus-src-alpha',
+                                operation: 'add'
+                            }
+                        },
+                        writeMask: GPUColorWrite.ALL  // 写入所有通道
+                    }
+                ]
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'back',
+                // frontFace: 'cw' // 设定顺时针 = 正面
+            },
+            depthStencil: {
+                format: WebGPURenderer.depthFormat,
+                depthWriteEnabled: true,
+                depthCompare: 'less', // 进盖远
+            },
+            multisample: {
+                count: WebGPURenderer.config.sampleCount,
+                mask: 0xFFFFFFFF,  // 所有采样点都写入
+                alphaToCoverageEnabled: false
+            }
+        });
+        
+        WebGPURenderer.Pipelinelist.CartoonMaterial = await WebGPURenderer.device.createRenderPipelineAsync({
+            label: `3`,
+            layout: 'auto',
+            vertex: {
+                module: shaderModule,
+                entryPoint: "vsVertexUvNormal",
+                buffers: [
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 0,
+                                offset: 0,
+                                format: "float32x3"
+                            }
+                        ]
+                    },
+                    {
+                        arrayStride: 2 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 1,
+                                offset: 0,
+                                format: "float32x2"
+                            },
+                        ]
+                    },
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 2,
+                                offset: 0,
+                                format: "float32x3"
+                            },
+                        ]
+                    },
+                ]
+            },
+            fragment: {
+                module: shaderModule,
+                entryPoint: "fs_CartoonMaterial",
+                targets: [
+                    { 
+                        format: WebGPURenderer.format,
+                        blend: {
+                            color: {
+                                srcFactor: 'src-alpha',           // 源颜色乘以源alpha
+                                dstFactor: 'one-minus-src-alpha', // 目标颜色乘以(1-源alpha)
+                                operation: 'add'                  // 相加
+                            },
+                            alpha: {
+                                srcFactor: 'one',
+                                dstFactor: 'one-minus-src-alpha',
+                                operation: 'add'
+                            }
+                        },
+                        writeMask: GPUColorWrite.ALL  // 写入所有通道
+                    }
+                ]
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'back',
+                // frontFace: 'cw' // 设定顺时针 = 正面
+            },
+            depthStencil: {
+                format: WebGPURenderer.depthFormat,
+                depthWriteEnabled: true,
+                depthCompare: 'less', // 进盖远
+            },
+            multisample: {
+                count: WebGPURenderer.config.sampleCount,
+                mask: 0xFFFFFFFF,  // 所有采样点都写入
+                alphaToCoverageEnabled: false
+            }
+        });
+
+        WebGPURenderer.Pipelinelist.NormalMaterial = await WebGPURenderer.device.createRenderPipelineAsync({
+            label: `4`,
+            layout: 'auto',
+            vertex: {
+                module: shaderModule,
+                entryPoint: "vsVertexUvNormal",
+                buffers: [
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 0,
+                                offset: 0,
+                                format: "float32x3"
+                            }
+                        ]
+                    },
+                    {
+                        arrayStride: 2 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 1,
+                                offset: 0,
+                                format: "float32x2"
+                            },
+                        ]
+                    },
+                    {
+                        arrayStride: 3 * 4,
+                        attributes: [
+                            {
+                                shaderLocation: 2,
+                                offset: 0,
+                                format: "float32x3"
+                            },
+                        ]
+                    },
+                ]
+            },
+            fragment: {
+                module: shaderModule,
+                entryPoint: "fs_NormalMaterial",
+                targets: [
+                    { 
+                        format: WebGPURenderer.format,
+                        blend: {
+                            color: {
+                                srcFactor: 'src-alpha',           // 源颜色乘以源alpha
+                                dstFactor: 'one-minus-src-alpha', // 目标颜色乘以(1-源alpha)
+                                operation: 'add'                  // 相加
+                            },
+                            alpha: {
+                                srcFactor: 'one',
+                                dstFactor: 'one-minus-src-alpha',
+                                operation: 'add'
+                            }
+                        },
+                        writeMask: GPUColorWrite.ALL  // 写入所有通道
+                    }
+                ]
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'back',
+                // frontFace: 'cw' // 设定顺时针 = 正面
+            },
+            depthStencil: {
+                format: WebGPURenderer.depthFormat,
+                depthWriteEnabled: true,
+                depthCompare: 'less', // 进盖远
+            },
+            multisample: {
+                count: WebGPURenderer.config.sampleCount,
+                mask: 0xFFFFFFFF,  // 所有采样点都写入
+                alphaToCoverageEnabled: false
+            }
+        });
+
+
+
+        const w = Texture2D.defaultWidth;  //2048
+        const h = Texture2D.defaultHeight; //2048
+        const layer0Data = new Uint8Array(w * h * 4); 
+
+        // 填充默认颜色，比如纯白
+        for(let i=0;i< w*h*4;i+=4){
+            layer0Data[i+0]=255;
+            layer0Data[i+1]=255;
+            layer0Data[i+2]=255;
+            layer0Data[i+3]=255;
+        }
+
+        this.device.queue.writeTexture(
+            { texture: this.Resource.Texture.Texture2DArray, origin: [0,0,0] },
+            layer0Data,
+            { bytesPerRow: w * 4 },   // 源数据一行字节数 = 真实纹理宽 *4
+            [w, h, 1]                 // 写入完整一层
+        );
