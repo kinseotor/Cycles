@@ -154,7 +154,6 @@ class Camera {
             this.projectionMatrix4x4.element = Camera.createPerspectiveMatrix4x4Data(this.fov,this.aspect,this.near,this.far);
         } else if ( this._type === "Orthographic" ){
             this.projectionMatrix4x4.element = Camera.createOrthographicMatrix4x4Data(this.orthoSize,this.aspect,this.near,this.far);
-            console.log(this.projectionMatrix4x4.element)
         }
         this.status.needUpdateProjectionMatrix4x4 = false;
         this.status.hasChangeProjectionMatrix4x4 = true;

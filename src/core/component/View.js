@@ -78,9 +78,12 @@ class View extends ComponentBase {
         canvas['__cycles__'].multisampleTextureView = canvas['__cycles__'].multisampleTexture.createView()
     }
 
-    static clearColor( canvas ) {
+    static createCommandEncoder() {
         this.encoder = WebGPURenderer.device.createCommandEncoder();
         canvas['__cycles__'].canvasTextureView = canvas['__cycles__'].context.getCurrentTexture().createView()
+    }
+
+    static clearColor( canvas ) {
         const pass = this.encoder.beginRenderPass({
             colorAttachments: [{
                 view: canvas['__cycles__'].multisampleTextureView,
@@ -170,7 +173,7 @@ class View extends ComponentBase {
         }
     }
 
-    createLoadRenderPassHasdepth() {
+    createLoadRenderPass() {
         
         this.pass = View.encoder.beginRenderPass({
             colorAttachments: [{
@@ -188,32 +191,6 @@ class View extends ComponentBase {
                 depthStoreOp: "store",
                 depthClearValue: 1.0,
             }
-        });
-        this.pass.setViewport(
-            ...this.viewPort.toArray(),
-            0,1
-        );
-
-        if ( this.status.enableScissorRect ) {
-            this.pass.setScissorRect(
-                ...this.scissorRect.toArray()
-            );
-        }
-
-        this.pass.setBindGroup( 1, WebGPURenderer.b1 );
-        this.pass.setBindGroup( 2, WebGPURenderer.b2 );
-    }
-
-    createLoadRenderPass() {
-        
-        this.pass = View.encoder.beginRenderPass({
-            colorAttachments: [{
-                view: this.canvas['__cycles__'].multisampleTextureView,
-                resolveTarget: this.canvas['__cycles__'].canvasTextureView,
-                clearValue: this.canvas['__cycles__'].backgroundColor.toArray(),
-                loadOp: 'load',
-                storeOp:"store"
-            }]
         });
         this.pass.setViewport(
             ...this.viewPort.toArray(),

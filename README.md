@@ -1,5 +1,3 @@
-这个世界会见识到我的倔强和厉害的
-
 Cycles世界坐标系采用的是笛卡尔右手坐标系，默认 x 向右，y 向上，z 向外，同时使用 -z 轴为正前方朝向
 https://www.w3.org/TR/webgpu/
 https://webgpufundamentals.org/webgpu/lessons/zh_cn/
@@ -73,3 +71,5 @@ device.queue.writeTexture(
 
 MikuMikuDance
 https://madebyevan.com/webgl-water/
+
+这个世界会见识到我的倔强和厉害的

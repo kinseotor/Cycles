@@ -218,6 +218,11 @@ class WebGPURenderer {
                 cullMode: 'back',
                 frontFace: 'ccw'
             },
+            depthStencil: {
+                format: WebGPURenderer.depthFormat,
+                depthWriteEnabled: false,
+                depthCompare: 'less',
+            },
             multisample: {
                 count: WebGPURenderer.config.sampleCount,
                 mask: 0xFFFFFFFF,

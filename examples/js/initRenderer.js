@@ -57,6 +57,8 @@ function viewCtrl(x, y) {
     view.viewPort.y += y*2;
 }
 
+console.log(new Cycles.SkyBox())
+
 const sprite = new Cycles.Plane()
 sprite.setShape(200,200);
 sprite.updateAttribute();
@@ -75,7 +77,6 @@ const pmxpath = [
 ]
 const pmxloader = new Cycles.PMXLoader();
 let model = await pmxloader.load(pmxpath[2]);
-
 let frameCount = 0;
 function render() {
     // node1.rotation.y = frameCount/10;
@@ -84,9 +85,10 @@ function render() {
     Cycles.Node.recursionRootNode(node5, Cycles.Node.updateNodeWorldMatrix4x4);
 
     Cycles.WebGPURenderer.update();
-    Cycles.View.clearColor(canvas);
 
-    view.createLoadRenderPassHasdepth();
+    Cycles.View.createCommandEncoder();
+    Cycles.View.clearColor(canvas);
+    view.createLoadRenderPass();
 
     // 髪.png
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
