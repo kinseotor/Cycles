@@ -27,7 +27,7 @@ node5.addChild( // ui root
 
 node0.position.set(0, 0, 0);
 node1.position.set(0, 1.2, 0); // camera orbit node
-node2.position.set(0, 0, 20); // camera
+node2.position.set(0, 0, 2); // camera
 node3.position.set(0, 0, 0);
 node4.rotation.set(0, 0, 0);
 
@@ -266,18 +266,6 @@ function render() {
 
         }
     );
-    
-    // view_ui.drawGeometry(
-    //     Cycles.WebGPURenderer.Pipelinelist.Line,
-    //     xyz,
-    //     {
-    //         offset: 1024,
-    //     },
-    //     {
-
-    //     }
-    // );
-
     view_ui.end();
 
     Cycles.View.submitCommandEncoder();

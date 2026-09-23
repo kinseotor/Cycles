@@ -3,7 +3,8 @@ import {
     View,
     Texture2D,
     Loader,
-    RenderPipeline
+    RenderPipeline,
+    SkyBox,
 } from "../../../../Module.js";
 
 class WebGPURenderer {
@@ -30,6 +31,7 @@ class WebGPURenderer {
     static DynamicOffset_SLOT_SIZE = 256; // ≥ minUniformBufferOffsetAlignment
     static RENDER_STRUCT_COUNT = 4 * 4 *2;
     static DRAW_CALL_COUNT = 100;
+    static DRAW_CALL_INDEX = 0;
 
 
     static shaderCode = {
@@ -148,25 +150,26 @@ class WebGPURenderer {
 
     static async createPipelines() {
         // skybox
-        this.Pipelinelist.Skybox = await RenderPipeline.createVertexUvNormalPipeline({
+        this.Pipelinelist.SkyBox = await RenderPipeline.createVertexUvNormalPipeline({
             label: 'SkyBox',
-            vertexShaderModule: WebGPURenderer.shaderModule.default,
-            fragmentShaderModule: WebGPURenderer.shaderModule.default,
-            vs_name: 'vs_VertexUvNormal',
-            fs_name: 'fs_BasicMaterial',
+            vertexShaderModule: WebGPURenderer.shaderModule.skyBox,
+            fragmentShaderModule: WebGPURenderer.shaderModule.skyBox,
+            vs_name: 'vs',
+            fs_name: 'fs',
             bindGroupLayouts: [
                 WebGPURenderer.BindGrouplayout._0,
                 WebGPURenderer.BindGrouplayout._1,
                 WebGPURenderer.BindGrouplayout._2,
+                SkyBox.bindGroupLayout,
             ],
             primitive: {
                 topology: WebGPURenderer.config.topologyTypeList[3],
-                cullMode: 'back',
+                cullMode: 'none', // "back" "front" "none"
                 frontFace: 'ccw'
             },
             depthStencil: {
                 format: WebGPURenderer.depthFormat,
-                depthWriteEnabled: true,
+                depthWriteEnabled: false,
                 depthCompare: 'less',
             },
             multisample: {

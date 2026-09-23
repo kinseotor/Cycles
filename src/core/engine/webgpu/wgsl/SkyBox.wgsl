@@ -6,10 +6,8 @@ struct Varying_Skybox {
 struct SkyParams {
     sunDir   : vec3f,   // 太阳方向（单位向量）
     exposure : f32,
-    zenith   : vec3f,   // 天顶色
-    _pad0    : f32,
-    horizon  : vec3f,   // 地平线色
-    _pad1    : f32,
+    zenith   : vec4f,   // 天顶色
+    horizon  : vec4f,   // 地平线色
 };
 
 struct DynamicOffset {
@@ -39,7 +37,8 @@ fn vs(@location(0) position : vec3f) -> Varying_Skybox {
     var o : Varying_Skybox;
     o.dir = position;
     let clip = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( position, 1.0);
-    o.pos = vec4f(clip.xy, clip.w, clip.w);
+    o.pos = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( position, 1.0);
+    // o.pos = vec4f(clip.xy, clip.w, clip.w);
     return o;
 }
 
@@ -47,7 +46,7 @@ fn skyColor(dir : vec3f) -> vec3f {
     let y = clamp(dir.y, -1.0, 1.0);
 
     // 天顶 → 地平线渐变
-    var col = mix(sky.zenith, sky.horizon, pow(1.0 - max(y, 0.0), 2.0));
+    var col = mix(sky.zenith.xyz, sky.horizon.xyz, pow(1.0 - max(y, 0.0), 2.0));
 
     // 太阳：光晕 + HDR 日盘
     let sunAmt = max(dot(dir, sky.sunDir), 0.0);
@@ -66,7 +65,7 @@ fn fs(v : Varying_Skybox) -> @location(0) vec4f {
 
     // 地平线以下：地面/雾色，避免下半屏穿帮
     if (dir.y < 0.0) {
-        col = mix(sky.horizon * 0.6, vec3f(0.2, 0.2, 0.2),
+        col = mix(sky.horizon.xyz * 0.6, vec3f(0.2, 0.2, 0.2),
                   min(-dir.y * 4.0, 1.0));
     }
 
@@ -76,5 +75,7 @@ fn fs(v : Varying_Skybox) -> @location(0) vec4f {
     // WebGPU 画布默认不做 sRGB 转换，手动加伽马（不想要可删）
     col = pow(col, vec3f(1.0 / 2.2));
 
-    return vec4f(col, 1.0);
+    var b = vec3<f32>(1,1,1);
+
+    return vec4f( col, 1.0 );
 }

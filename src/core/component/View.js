@@ -84,6 +84,7 @@ class View extends ComponentBase {
     }
 
     static clearColor( canvas ) {
+        WebGPURenderer.DRAW_CALL_INDEX = 0;
         const pass = this.encoder.beginRenderPass({
             colorAttachments: [{
                 view: canvas['__cycles__'].multisampleTextureView,
