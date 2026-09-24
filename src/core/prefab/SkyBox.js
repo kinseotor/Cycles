@@ -1,10 +1,13 @@
 import { WebGPURenderer, Cube, Vector1, Vector3, Vector4, Prefab } from "../../Module.js";
 class SkyBox{
     static typeMenu = ['programCube', 'textureCube'];
-    static cube = new Cube();
+    static geometry = new Cube();
 
     static init() {
-        this.cube.updateAttribute();
+        this.radius = 100;
+        this.geometry.setShape( this.radius, this.radius, this.radius );
+        
+        this.geometry.updateAttribute();
         this._type = SkyBox.typeMenu[0];
         this.bindGroupLayout = WebGPURenderer.device.createBindGroupLayout({
             label: "skybox",
@@ -23,12 +26,16 @@ class SkyBox{
             size: 4*4*3,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
+
+        const day    = { zenith: [0.05, 0.15, 0.45], horizon: [0.55, 0.70, 0.85] };
+        const sunset = { zenith: [0.08, 0.10, 0.25], horizon: [0.95, 0.45, 0.15] };
+
         this.property = {
-            sunDir   : new Vector3( 1, 1, 1 ).normalize(),          // 太阳方向（单位向量）
-            exposure : new Vector1(),                   // 暴露
-            zenith   : new Vector4( 0, 0, 1, 1 ),       // 天顶色
-            horizon  : new Vector4( 0.1, 0.1, 0.1, 1 ), // 地平线色
-        }
+            sunDir   : new Vector3( 0, 0.5, -1).normalize(), // 0.3, 0.7, 0.2
+            exposure : new Vector1(1.5),
+            zenith   : new Vector4(0.05, 0.15, 0.45, 1),
+            horizon  : new Vector4(0.55, 0.70, 0.85, 1),
+        };
         this.writeData();
 
         this.bindGroup = WebGPURenderer.device.createBindGroup({

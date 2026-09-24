@@ -37,8 +37,7 @@ fn vs(@location(0) position : vec3f) -> Varying_Skybox {
     var o : Varying_Skybox;
     o.dir = position;
     let clip = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( position, 1.0);
-    o.pos = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( position, 1.0);
-    // o.pos = vec4f(clip.xy, clip.w, clip.w);
+    o.pos = vec4f(clip.xy, clip.w, clip.w);
     return o;
 }
 
@@ -64,7 +63,7 @@ fn fs(v : Varying_Skybox) -> @location(0) vec4f {
     var col = skyColor(dir);
 
     // 地平线以下：地面/雾色，避免下半屏穿帮
-    if (dir.y < 0.0) {
+    if (dir.y < -0.0) {
         col = mix(sky.horizon.xyz * 0.6, vec3f(0.2, 0.2, 0.2),
                   min(-dir.y * 4.0, 1.0));
     }
@@ -79,3 +78,5 @@ fn fs(v : Varying_Skybox) -> @location(0) vec4f {
 
     return vec4f( col, 1.0 );
 }
+
+// https://threejs.org/examples/webgpu_sky

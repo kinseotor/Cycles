@@ -26,8 +26,8 @@ node5.addChild( // ui root
 );
 
 node0.position.set(0, 0, 0);
-node1.position.set(0, 0, 0); // camera orbit node
-node2.position.set(0, 0, 5); // camera
+node1.position.set(0, 2, 0); // camera orbit node
+node2.position.set(0, 0, 2); // camera
 node3.position.set(0, 0, 0);
 node4.rotation.set(0, 0, 0);
 
@@ -38,6 +38,8 @@ node7.rotation.set(90, 0, 0);
 const canvas = document.getElementById('canvas');
 const view = new Cycles.View({ canvas: canvas, node: node2 });
 const view_ui = new Cycles.View({ canvas: canvas, node: node6, camera: new Cycles.Camera({type:'Orthographic'}) });
+canvas.__cycles__.backgroundColor.set( 0,0,0,1)
+console.log(canvas.__cycles__.backgroundColor)
 
 const input = new Input({ DOMElement: canvas });
 input.damper.set(0, 0)
@@ -60,6 +62,7 @@ const cube = new Cycles.Cube()
 cube.updateAttribute();
 
 const xyz = new Cycles.CoordinateSystem()
+xyz.setShape(100,100,0,100,100)
 xyz.updateAttribute();
 
 let frameCount = 0;
@@ -77,6 +80,8 @@ function render() {
     
 
     view.createLoadRenderPass();
+
+    // sky box
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
         [
             0, 0, 5, 3
@@ -87,9 +92,10 @@ function render() {
             1440/4096, 1440/4096, 0/4096, 0/4096
         ]
     ));
+    view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
     view.drawGeometry(
-        Cycles.WebGPURenderer.Pipelinelist.Line,
-        xyz,
+        Cycles.WebGPURenderer.Pipelinelist.SkyBox,
+        Cycles.SkyBox.geometry,
         {
             offset: 256,
         },
@@ -98,7 +104,6 @@ function render() {
         }
     );
 
-    
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 512, new Uint32Array(
         [
             0, 0, 5, 3
@@ -109,10 +114,9 @@ function render() {
             1440/4096, 1440/4096, 0/4096, 0/4096
         ]
     ));
-    view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
     view.drawGeometry(
-        Cycles.WebGPURenderer.Pipelinelist.SkyBox,
-        Cycles.SkyBox.cube,
+        Cycles.WebGPURenderer.Pipelinelist.Line,
+        xyz,
         {
             offset: 512,
         },

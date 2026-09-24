@@ -132,19 +132,20 @@ class View extends ComponentBase {
         this.height = 300;
 
         this._type = 'View';
-        this.backgroundColor = new Vector4( 0.2, 0.2, 0.2, 0.0 );
         this.viewPort = new Vector4( this.x, this.y, this.width, this.height );
         this.scissorRect = new Vector4( this.x, this.y, this.canvas.width, this.canvas.height );
         this.viewMatrix4x4 = new Matrix4x4();
         this.cameraViewMatrix4x4 = new Matrix4x4();
-        this.instance_index = View.instance_index++;
-        View.add(this);
 
         this.status = {
             isFirstDraw: true,
             loadOp: 'clear', // ['clear','load']
             enableScissorRect: false,
         }
+
+        this.instance_index = View.instance_index++;
+        View.add(this);
+
     }
     #node = null;
     setNode( node ) {
@@ -180,7 +181,7 @@ class View extends ComponentBase {
             colorAttachments: [{
                 view: this.canvas['__cycles__'].multisampleTextureView,
                 resolveTarget: this.canvas['__cycles__'].canvasTextureView,
-                clearValue: this.canvas['__cycles__'].backgroundColor.toArray(),
+                // clearValue: this.canvas['__cycles__'].backgroundColor.toArray(),
                 loadOp: 'load',
                 storeOp:"store"
             }],

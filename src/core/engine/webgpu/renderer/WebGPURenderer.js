@@ -170,7 +170,7 @@ class WebGPURenderer {
             depthStencil: {
                 format: WebGPURenderer.depthFormat,
                 depthWriteEnabled: false,
-                depthCompare: 'less',
+                depthCompare: 'less-equal',
             },
             multisample: {
                 count: WebGPURenderer.config.sampleCount,
