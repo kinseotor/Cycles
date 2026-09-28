@@ -45,7 +45,7 @@ const input = new Input({ DOMElement: canvas });
 input.damper.set(0, 0)
 
 function CameraCtrl(x, y) {
-    node1.rotation.x = Math.max(-60, Math.min(60, (node1.rotation.x - y / 2)))
+    node1.rotation.x = Math.max(-90, Math.min(90, (node1.rotation.x - y / 2)))
     node1.rotation.y -= x / 2;
 }
 

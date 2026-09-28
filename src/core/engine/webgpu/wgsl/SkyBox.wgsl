@@ -72,18 +72,30 @@ fn skyColor(dir : vec3f) -> vec3f {
     let X = x / max(y, 1e-4) * Y;
     let Z = (1.0 - x - y) / max(y, 1e-4) * Y;
 
-    return max(mat3x3f(
-         3.2406, -0.9689,  0.0557,
-        -1.5372,  1.8758, -0.2040,
-        -0.4986,  0.0415,  1.0570) * vec3f(X, Y, Z), vec3f(0.0));
+    var rgb = mat3x3f(
+     3.2406, -0.9689,  0.0557,
+    -1.5372,  1.8758, -0.2040,
+    -0.4986,  0.0415,  1.0570) * vec3f(X, Y, Z);
+    let mn = min(rgb.r, min(rgb.g, rgb.b));
+    return rgb - min(mn, 0.0);
 }
 
 @fragment
 fn fs(v : Varying_Skybox) -> @location(0) vec4f {
     let dir = normalize(v.dir);
     var col = mix(vec3f(0.004, 0.006, 0.018), skyColor(dir), p.day);
-    col = 1.0 - exp(-col * p.cY234exp.w);       // tonemap + exposure
+    let m = max(col.r, max(col.g, col.b));
+    col /= max(1.0, m * 0.85);
+    col = 1.0 - exp(-col);       // tonemap + exposure
     col = pow(col, vec3f(1.0 / 2.2));           // gamma
+    
+    let sunAmt = max(dot(dir, p.sunDir), 0.0);
+    col += vec3f(1.0, 0.6, 0.3) * pow(sunAmt, 8.0*64) * 0.4;
+    col += vec3f(1.0, 0.9, 0.7) * pow(sunAmt, 1024.0*8) * 20.0;
+
+    let warm = 1.0 - smoothstep( 0.0, 0.3, p.sunDir.y);
+    col.g *= mix(1.0, 0.55, warm);
+
     return vec4f(col, 1.0);
 }
 

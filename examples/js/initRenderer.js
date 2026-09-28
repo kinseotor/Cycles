@@ -27,7 +27,8 @@ node5.addChild( // ui root
 
 node0.position.set(0, 0, 0);
 node1.position.set(0, 1.2, 0); // camera orbit node
-node2.position.set(0, 0, 2); // camera
+node1.rotation.set(0, 0, 0);
+node2.position.set(0, 0, 200); // camera
 node3.position.set(0, 0, 0);
 node4.rotation.set(0, 0, 0);
 
@@ -57,16 +58,15 @@ function viewCtrl(x, y) {
     view.viewPort.y += y*2;
 }
 
-console.log(new Cycles.SkyBox())
-
 const sprite = new Cycles.Plane()
-sprite.setShape(200,200);
+sprite.setShape(100,100);
 sprite.updateAttribute();
 
 const cube = new Cycles.Cube()
 cube.updateAttribute();
 
 const xyz = new Cycles.CoordinateSystem()
+xyz.setShape(100,100,0,10,10)
 xyz.updateAttribute();
 
 const pmxpath = [
@@ -89,6 +89,29 @@ function render() {
     Cycles.View.createCommandEncoder();
     Cycles.View.clearColor(canvas);
     view.createLoadRenderPass();
+    
+    // sky box
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
+        [
+            0, 0, 5, 3
+        ]
+    ));
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 272, new Float32Array(
+        [
+            1440/4096, 1440/4096, 0/4096, 0/4096
+        ]
+    ));
+    view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
+    view.drawGeometry(
+        Cycles.WebGPURenderer.Pipelinelist.SkyBox,
+        Cycles.SkyBox.geometry,
+        {
+            offset: 256,
+        },
+        {
+
+        }
+    );
 
     // 髪.png
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
