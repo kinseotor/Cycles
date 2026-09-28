@@ -53,3 +53,18 @@ fn fs_main(@builtin(position) pos: vec4f) -> @location(0) vec4f {
   
   return mix(layer0, layer1, 0.5);
 }
+
+
+fn skyColor(dir : vec3f) -> vec3f {
+    let y = clamp(dir.y, -1.0, 1.0);
+
+    // 天顶 → 地平线渐变
+    var col = mix(sky.zenith.xyz, sky.horizon.xyz, pow(1.0 - max(y, 0.0), 2.0));
+
+    // 太阳：光晕 + HDR 日盘
+    let sunAmt = max(dot(dir, sky.sunDir), 0.0);
+    col += vec3f(1.0, 0.6, 0.3) * pow(sunAmt, 8.0) * 0.4;
+    col += vec3f(1.0, 0.9, 0.7) * pow(sunAmt, 1024.0) * 20.0;
+
+    return col;
+}

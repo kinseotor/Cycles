@@ -34,7 +34,6 @@ class Vector1 {
         this.status.needUpdate = true;
     }
 
-    // 返回一个数组:[x,y]
     toArray( length = 1 ) {
         return [ this._property.x ].slice( 0, length );
     }

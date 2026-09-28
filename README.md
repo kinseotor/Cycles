@@ -46,7 +46,7 @@ alphaMode: 'premultiplied' : 浏览器会按照预乘透明规则，把画布和
 
 kinseo
 
-
+Preetham 模型
 
 @group(0) @binding(0) var texArr: texture_array<f32>;
 @group(0) @binding(1) var samp: sampler;

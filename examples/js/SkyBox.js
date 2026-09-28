@@ -62,7 +62,7 @@ const cube = new Cycles.Cube()
 cube.updateAttribute();
 
 const xyz = new Cycles.CoordinateSystem()
-xyz.setShape(100,100,0,100,100)
+xyz.setShape(100,100,0,10,10)
 xyz.updateAttribute();
 
 let frameCount = 0;

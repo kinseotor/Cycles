@@ -22,6 +22,7 @@ class WebGPURenderer {
         depthFormat: ['depth24plus','depth32float','depth24plus-stencil8'][0],
         topologyTypeList: ['point-list','line-list','line-strip','triangle-list','triangle-strip'],
         topologyType: ['point-list','line-list','line-strip','triangle-list','triangle-strip'][4],
+        cullModeTypeList: ["back","front","none"],
     }
 
     // rgba8unorm | bgra8unorm？
@@ -164,7 +165,7 @@ class WebGPURenderer {
             ],
             primitive: {
                 topology: WebGPURenderer.config.topologyTypeList[3],
-                cullMode: 'none', // "back" "front" "none"
+                cullMode: 'front', // "back" "front" "none"
                 frontFace: 'ccw'
             },
             depthStencil: {
