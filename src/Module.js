@@ -11,7 +11,7 @@ import * as Utility from './core/math/Utility.js'
 import { ComponentBase } from './core/component/ComponentBase.js'
 import { View } from './core/component/View.js'
 
-import { Mesh } from './core/component/mesh/Mesh.js'
+import { Mesh, childrenMesh } from './core/data/mesh/Mesh.js'
 
 import { DataBase } from './core/data/DataBase.js'
 import { Camera } from './core/data/camera/Camera.js'
@@ -45,7 +45,7 @@ export {
     // config
     config,
     // component
-    ComponentBase, Mesh, View,
+    ComponentBase, Mesh, childrenMesh, View,
     // data
     DataBase,
     Camera, Material, Texture2D,

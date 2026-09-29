@@ -44,7 +44,7 @@ const input = new Input({ DOMElement: canvas });
 input.damper.set(0, 0)
 
 function CameraCtrl(x, y) {
-    node1.rotation.x = Math.max(-60, Math.min(60, (node1.rotation.x - y / 2)))
+    node1.rotation.x = Math.max(-90, Math.min(90, (node1.rotation.x - y / 2)))
     node1.rotation.y -= x / 2;
 }
 
@@ -77,6 +77,12 @@ const pmxpath = [
 ]
 const pmxloader = new Cycles.PMXLoader();
 let model = await pmxloader.load(pmxpath[2]);
+console.log( model )
+
+// const mesh = new Cycles.Mesh();
+// mesh.geometry = model;
+// console.log(mesh,model)
+
 let frameCount = 0;
 function render() {
     // node1.rotation.y = frameCount/10;
@@ -132,7 +138,7 @@ function render() {
     for (let i = 0; i < mat_arr6.length; i += 2) {
         view.drawGeometry(
             Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model,
+            model.skinGeometry,
             {
                 offset: 256,
             },
@@ -186,7 +192,7 @@ function render() {
 
         view.drawGeometry(
             Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model,
+            model.skinGeometry,
             {
                 offset: 512,
             },
@@ -222,7 +228,7 @@ function render() {
 
         view.drawGeometry(
             Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model,
+            model.skinGeometry,
             {
                 offset: 768,
             },
