@@ -28,7 +28,7 @@ node5.addChild( // ui root
 node0.position.set(0, 0, 0);
 node1.position.set(0, 1.2, 0); // camera orbit node
 node1.rotation.set(0, 0, 0);
-node2.position.set(0, 0, 200); // camera
+node2.position.set(0, 0, 20); // camera
 node3.position.set(0, 0, 0);
 node4.rotation.set(0, 0, 0);
 

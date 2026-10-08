@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>see</title>
+</head>
+<body>
+    <script>
+        const imgs = [
+            '1.bin',
+            '2.bin',
+            '3.bin',
+            '4.bin',
+            '5.bin',
+            '6.bin',
+
+            '11.bin',
+            '12.bin',
+            '13.bin',
+            '14.bin',
+            '15.bin',
+
+            '21.bin',
+            '22.bin',
+            '23.bin',
+            '24.bin',
+            '25.bin',
+
+            '31.bin',
+            '32.bin',
+            '33.bin',
+            '34.bin',
+            '35.bin',
+        ];
+        const rootPath = '';
+
+        const OFFSET = 16, HEAD = 100, MASK = 0x5A;
+        async function restore( cv, url ) {
+            // 1. 拉取 bin 文件，得到完整二进制
+            const buffer = await (await fetch(url)).arrayBuffer();
+            // 2. 从 buffer 第16字节开始截取，生成Uint8Array视图
+            const data = new Uint8Array(buffer, OFFSET);
+            // 3. 对前HEAD=100个字节做异或解密：byte ^ 0x5A
+            for (let i = 0; i < HEAD && i < data.length; i++) data[i] ^= MASK;
+            // 4. 把解密后的二进制包装成 webp blob，交给 createImageBitmap 解码
+            const bmp = await createImageBitmap(new Blob([data], { type: "image/webp" }));
+            // 5. 把图片绘制到 canvas
+            cv.width = bmp.width;
+            cv.height = bmp.height;
+            cv.getContext("2d").drawImage(bmp, 0, 0);
+            bmp.close();
+            cv.removeAttribute("data-src"); 
+        }
+
+        for ( let i = 0; i < imgs.length; i++ ) {
+            const canvas = document.createElement('canvas');
+            restore( canvas, imgs[i])
+            document.body.appendChild(canvas)
+        }
+
+    </script>
+</body>
+</html>
