@@ -1,4 +1,4 @@
-import { SkinGeometry, Node } from '../Module.js'
+import { SkinGeometry, Mesh } from '../Module.js'
 
 class PMXLoader {
     async readArrayBuffer( url ) {
@@ -88,6 +88,32 @@ class PMXLoader {
           skinGeometry.attribute.indices.push(face[2],face[1],face[0])
           // skinGeometry.attribute.indices.push(...face)
         }
+
+        const mesh = new Mesh();
+
+        this.__cycles__ = {
+          normalTexture: []
+        }
+
+        let _start = 0;
+        let a = []
+        let arr_cm = []
+
+        for ( let m of this.pmx.model.materials) {
+          m._start = _start;
+          m._ = [m.faceSize,m._start]
+
+          arr_cm.push({
+            indexCount:m.faceSize,
+            firstIndex:_start
+          })
+          // if (m.normalTexture === 6) a.push(m._)
+          // if (m.normalTexture > -1 && this.__cycles__.normalTexture.indexOf(m.normalTexture) === -1) this.__cycles__.normalTexture.push( m.normalTexture )
+          _start += m.faceSize;
+        }
+        console.log(arr_cm)
+        // console.dir(this.__cycles__.normalTexture)
+
         // let start = 0;
         // for (let material of this.pmx.model.materials) {
         //   let m = new PMXLoader.Material({BaseColorTexture:this.getSupportedImagePath(this.modelRootPath + this.pmx.model.textures[material.normalTexture]),indexCount: material.faceSize, firstIndex: start});
@@ -118,7 +144,7 @@ class PMXLoader {
         // SkinGeometry.Animation = {
         //   NodeArray,
         // }
-        return skinGeometry;
+        return { skinGeometry, mesh };
     }
 
     parsePMX() {
@@ -146,21 +172,6 @@ class PMXLoader {
         this.pmx.model.frames = this.arrayOf('frame'); // 帧
         this.pmx.model.rigids = this.arrayOf('rigid'); //刚体
         this.pmx.model.joints = this.arrayOf('joint'); //关节
-
-        this.__cycles__ = {
-          normalTexture: []
-        }
-
-        // let _start = 0;
-        // let a = []
-        // for ( let m of this.pmx.model.materials) {
-        //   m._start = _start;
-        //   _start += m.faceSize;
-        //   m._ = [m.faceSize,m._start]
-        //   if (m.normalTexture === 6) a.push(m._)
-        //   if (m.normalTexture > -1 && this.__cycles__.normalTexture.indexOf(m.normalTexture) === -1) this.__cycles__.normalTexture.push( m.normalTexture )
-        // }
-        // console.dir(this.__cycles__.normalTexture)
 
         console.log(this.pmx.model.materials)
         // console.log(this.pmx.model.textures)

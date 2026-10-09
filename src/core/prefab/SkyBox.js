@@ -28,15 +28,15 @@ class SkyBox{
         });
 
         this.property = {
-            elevation: new Vector1( 20 ), // 高度 [-90, 90]
+            elevation: new Vector1( 90 ), // 高度 [-90, 90]
             azimuth  : new Vector1( 180 ),  // 方位角 [-180, 180], -z
             turbidity: new Vector1( 2 ),  // 浑浊度 [2, 6]
-            exposure : new Vector1( 1 ),  // 亮度归一化后的曝光
+            exposure : new Vector1( 0 ),  // 亮度归一化后的曝光
         };
 
         this.params = {
             sunDir   : new Vector3(),
-            exposure : new Vector1( 1 ),
+            exposure : new Vector1( 0 ),
         }
 
         this.result = []
@@ -100,8 +100,7 @@ class SkyBox{
         const xScale = xz / f0(cx);
         const yScale = yz / f0(cy);
         const YScale = 1  / f0(cY);      // Yz 在归一化中约掉，无需上传
-
-        // 5. 打包（与 WGSL struct 严格对应，共 24 个 float = 96 字节）
+        
         this.result = new Float32Array(24);
         this.result.set(this.params.sunDir.toArray(), 0);                 // 0..2   sunDir.xyz
         this.result[3] = day;                       //        day
@@ -110,7 +109,7 @@ class SkyBox{
         this.result[12]=cx[4]; this.result[13]=cy[0]; this.result[14]=cy[1]; this.result[15]=cy[2];
         this.result[16]=cy[3]; this.result[17]=cy[4]; this.result[18]=cY[0]; this.result[19]=cY[1];
         this.result[20]=cY[2]; this.result[21]=cY[3]; this.result[22]=cY[4];
-        this.result[23] = this.property.exposure.x;      // exposure 顺手塞进最后一个空位
+        this.result[23] = this.property.exposure.x;
         
         return this;
     }

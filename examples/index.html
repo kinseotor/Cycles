@@ -23,6 +23,7 @@
         window.Input = Input;
         
         const script_menu = [
+            './js/initMesh.js',
             './js/SkyBox.js',
             './js/initRenderer.js',
             './js/mikumiku.js',
@@ -38,10 +39,10 @@
 
         Cycles.WebGPURenderer.init().then((r) => {
             
-            Cycles.SkyBox.init()
+            Cycles.SkyBox.init();
 
             Cycles.WebGPURenderer.createPipelines().then(()=>{
-                loadScript( 1 );
+                loadScript( 0 );
             })
         });
         
