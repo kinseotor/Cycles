@@ -77,7 +77,7 @@ const pmxpath = [
 ]
 const pmxloader = new Cycles.PMXLoader();
 let model = await pmxloader.load(pmxpath[2]);
-console.log( model )
+console.log( model.mesh )
 
 // const mesh = new Cycles.Mesh();
 // mesh.geometry = model;
@@ -97,27 +97,26 @@ function render() {
     view.createLoadRenderPass();
     
     // sky box
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
-        [
-            0, 0, 5, 3
-        ]
-    ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 272, new Float32Array(
-        [
-            1440/4096, 1440/4096, 0/4096, 0/4096
-        ]
-    ));
-    view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
-    view.drawGeometry(
-        Cycles.WebGPURenderer.Pipelinelist.SkyBox,
-        Cycles.SkyBox.geometry,
-        {
-            offset: 256,
-        },
-        {
-
-        }
-    );
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
+    //     [
+    //         0, 0, 5, 3
+    //     ]
+    // ));
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 272, new Float32Array(
+    //     [
+    //         1440/4096, 1440/4096, 0/4096, 0/4096
+    //     ]
+    // ));
+    // view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
+    // view.drawGeometry(
+    //     Cycles.WebGPURenderer.Pipelinelist.SkyBox,
+    //     Cycles.SkyBox.geometry,
+    //     {
+    //         offset: 256,
+    //     },
+    //     {
+    //     }
+    // );
 
     // 髪.png
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(

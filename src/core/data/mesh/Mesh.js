@@ -10,6 +10,7 @@ class Mesh {
         this.status = {
             visible: true,
         };
+        this.childrenMeshList = [];
     }
 
     set geometry( geometry ) {
@@ -20,8 +21,9 @@ class Mesh {
         return this._geometry;
     }
 
-    childrenMeshList = []
-
+    /**
+     * @zh childrenMesh构造配置对象
+     */
     setChildrenMeshList( array ) { 
         if ( !Array.isArray(array) || array.length === 0 ) return;
         this.childrenMeshList.length = 0;

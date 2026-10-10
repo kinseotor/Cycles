@@ -1,4 +1,4 @@
-import { SkinGeometry, Mesh } from '../Module.js'
+import { SkinGeometry, Mesh, childrenMesh } from '../Module.js'
 
 class PMXLoader {
     async readArrayBuffer( url ) {
@@ -112,6 +112,7 @@ class PMXLoader {
           _start += m.faceSize;
         }
         console.log(arr_cm)
+        mesh.setChildrenMeshList([{}])
         // console.dir(this.__cycles__.normalTexture)
 
         // let start = 0;

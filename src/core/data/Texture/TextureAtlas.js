@@ -61,4 +61,9 @@ class Sprite {
         Sprite.add( this );
     }
 }
-export { SpriteAtlas, Sprite }
+
+class TextureArray {
+
+}
+
+export { SpriteAtlas, Sprite, TextureArray }
