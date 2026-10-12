@@ -59,7 +59,7 @@ function viewCtrl(x, y) {
 }
 
 const sprite = new Cycles.Plane()
-sprite.setShape(100,100);
+sprite.setShape(50,50);
 sprite.updateAttribute();
 
 const cube = new Cycles.Cube()
@@ -77,7 +77,7 @@ const pmxpath = [
 ]
 const pmxloader = new Cycles.PMXLoader();
 let model = await pmxloader.load(pmxpath[2]);
-console.log( model.mesh )
+console.log( model.mesh.childrenMeshList )
 
 // const mesh = new Cycles.Mesh();
 // mesh.geometry = model;
@@ -264,26 +264,26 @@ function render() {
     view_ui.createLoadRenderPass();
 
     // View2D UI
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
-        [
-            1, 8, 5, 3
-        ]
-    ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
-        [
-            1440/4096, 1440/4096, 0/4096, 0/4096
-        ]
-    ));
     // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
     //     [
-    //         1, 8, 3, 3
+    //         1, 8, 5, 3
     //     ]
     // ));
     // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
     //     [
-    //         200/4096, 200/4096, 1220/4096, 2/4096
+    //         1440/4096, 1440/4096, 0/4096, 0/4096
     //     ]
     // ));
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
+        [
+            1, 8, 3, 3
+        ]
+    ));
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
+        [
+            200/4096, 200/4096, 1220/4096, 2/4096
+        ]
+    ));
     view_ui.drawGeometry(
         Cycles.WebGPURenderer.Pipelinelist.UI,
         sprite,

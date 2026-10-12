@@ -208,7 +208,7 @@ class Texture2D extends DataBase{
     }
 }
 
-class TextureManager {
+class TextureArrayManager {
     static load() {
 
     }
@@ -222,4 +222,4 @@ class TextureManager {
     }
 }
 
-export { Texture2D, TextureManager }
+export { Texture2D, TextureArrayManager }

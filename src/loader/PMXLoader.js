@@ -112,7 +112,7 @@ class PMXLoader {
           _start += m.faceSize;
         }
         console.log(arr_cm)
-        mesh.setChildrenMeshList([{}])
+        mesh.setChildrenMeshList(arr_cm)
         // console.dir(this.__cycles__.normalTexture)
 
         // let start = 0;
@@ -174,7 +174,7 @@ class PMXLoader {
         this.pmx.model.rigids = this.arrayOf('rigid'); //刚体
         this.pmx.model.joints = this.arrayOf('joint'); //关节
 
-        console.log(this.pmx.model.materials)
+        // console.log(this.pmx.model.materials)
         // console.log(this.pmx.model.textures)
         // console.log(this.pmx.model.vertices)
         // console.log(this.pmx.model.bones)

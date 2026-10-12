@@ -27,7 +27,7 @@ class WebGPURenderer {
 
     // rgba8unorm | bgra8unorm？
     static alphaMode = this.config.alphaModeList[ 1 ];
-    static depthFormat = this.config.depthFormatList[0];
+    static depthFormat = this.config.depthFormatList[ 0 ];
         
     static DynamicOffset_SLOT_SIZE = 256; // ≥ minUniformBufferOffsetAlignment
     static RENDER_STRUCT_COUNT = 4 * 4 *2;
