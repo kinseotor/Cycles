@@ -20,6 +20,33 @@ class MeshRenderer {
         }
     }
 
+    static updateGeometryBuffer( geometry ) {
+        if ( !geometry ) return;
+        if ( geometry.need.updateWebGPUBuffer ) {
+            geometry.updateAttribute();
+            geometry.WebGPUBuffer.indicesBuffer = WebGPURenderer.setUint16ArrayBuffer( geometry.attribute.indices );
+            geometry.WebGPUBuffer.verticesBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.vertices );
+            geometry.WebGPUBuffer.uvsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.uvs );
+            geometry.WebGPUBuffer.normalsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.normals );
+            geometry.need.updateWebGPUBuffer = false;
+        }
+    }
+    static _() {
+        if ( geometry.need.updateWebGPUBuffer ) {
+            this.updateGeometryBuffer( geometry );
+        }
+
+        view.pass.setPipeline( Pipeline );
+        view.pass.setBindGroup( 0, WebGPURenderer.b0, [ renderConfig.offset ] );
+        view.pass.setIndexBuffer( geometry.WebGPUBuffer.indicesBuffer, 'uint16');
+        
+        view.pass.setVertexBuffer(0, geometry.WebGPUBuffer.verticesBuffer);
+        view.pass.setVertexBuffer(1, geometry.WebGPUBuffer.uvsBuffer );
+        view.pass.setVertexBuffer(2, geometry.WebGPUBuffer.normalsBuffer );
+
+        if ( !renderConfig.offset || typeof renderConfig.offset !== 'number' ) renderConfig.offset = 0;
+    }
+
     static set__webgpu__Parameters(array) {
         if ( !Array.isArray(array) ) {
 

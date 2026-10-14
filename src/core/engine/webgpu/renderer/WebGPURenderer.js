@@ -496,11 +496,21 @@ class WebGPURenderer {
         if ( !WebGPURenderer.update() ) return;
     }
 
+    static drawGeometry( pass, drawConfig = {} ) {
+        if ( !drawConfig.instanceCount || typeof drawConfig.instanceCount !== 'number' ) drawConfig.instanceCount = 1;
+        if ( !drawConfig.indexCount || typeof drawConfig.indexCount !== 'number' ) drawConfig.indexCount = 0;
+        if ( !drawConfig.firstIndex || typeof drawConfig.firstIndex !== 'number' ) drawConfig.firstIndex = 0;
+        if ( !drawConfig.offsetVertex || typeof drawConfig.offsetVertex !== 'number' ) drawConfig.offsetVertex = 0;
+        if ( !drawConfig.firstInstance || typeof drawConfig.firstInstance !== 'number' ) drawConfig.firstInstance = 0;
 
-    draw() {
-
+        pass.drawIndexed(
+            drawConfig.indexCount,
+            drawConfig.instanceCount,
+            drawConfig.firstIndex,
+            drawConfig.offsetVertex,
+            drawConfig.firstInstance
+        );
     }
-
     
     static setFloat32ArrayBuffer( array ) {
         if ( array ) var vertices = new Float32Array( array );
