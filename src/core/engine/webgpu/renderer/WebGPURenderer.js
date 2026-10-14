@@ -496,19 +496,20 @@ class WebGPURenderer {
         if ( !WebGPURenderer.update() ) return;
     }
 
-    static drawGeometry( pass, drawConfig = {} ) {
-        if ( !drawConfig.instanceCount || typeof drawConfig.instanceCount !== 'number' ) drawConfig.instanceCount = 1;
-        if ( !drawConfig.indexCount || typeof drawConfig.indexCount !== 'number' ) drawConfig.indexCount = 0;
-        if ( !drawConfig.firstIndex || typeof drawConfig.firstIndex !== 'number' ) drawConfig.firstIndex = 0;
-        if ( !drawConfig.offsetVertex || typeof drawConfig.offsetVertex !== 'number' ) drawConfig.offsetVertex = 0;
-        if ( !drawConfig.firstInstance || typeof drawConfig.firstInstance !== 'number' ) drawConfig.firstInstance = 0;
+    static drawGeometry( pass, drawParameter = {} ) {
+        if ( !pass ) return;
+        if ( !drawParameter.indexCount || typeof drawParameter.indexCount !== 'number' ) drawParameter.indexCount = 0;
+        if ( !drawParameter.instanceCount || typeof drawParameter.instanceCount !== 'number' ) drawParameter.instanceCount = 1;
+        if ( !drawParameter.firstIndex || typeof drawParameter.firstIndex !== 'number' ) drawParameter.firstIndex = 0;
+        if ( !drawParameter.offsetVertex || typeof drawParameter.offsetVertex !== 'number' ) drawParameter.offsetVertex = 0;
+        if ( !drawParameter.firstInstance || typeof drawParameter.firstInstance !== 'number' ) drawParameter.firstInstance = 0;
 
         pass.drawIndexed(
-            drawConfig.indexCount,
-            drawConfig.instanceCount,
-            drawConfig.firstIndex,
-            drawConfig.offsetVertex,
-            drawConfig.firstInstance
+            drawParameter.indexCount,
+            drawParameter.instanceCount,
+            drawParameter.firstIndex,
+            drawParameter.offsetVertex,
+            drawParameter.firstInstance
         );
     }
     
