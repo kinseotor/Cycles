@@ -29,7 +29,7 @@ import { RenderPipeline } from './core/engine/webgpu/renderer/RenderPipeline.js'
 import { Prefab } from './core/prefab/Prefab.js'
 import { SkyBox } from './core/prefab/SkyBox.js';
 
-import { Loader } from './Loader/Loader.js'
+import { Loader } from './loader/Loader.js'
 import { PMXLoader } from './loader/PMXLoader.js'
 import { OBJLoader } from './loader/OBJLoader.js'
 import { GLTFLoader } from './loader/GLTFLoader.js'

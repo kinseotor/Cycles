@@ -119,12 +119,12 @@ function render() {
     // );
 
     // 髪.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256, new Uint32Array(
         [
             0, 3, 2, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 272, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 272, new Float32Array(
         [
             0.5, 0.5, 0, 0
         ]
@@ -149,12 +149,12 @@ function render() {
     }
 
     // 衣.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 512, new Uint32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 512, new Uint32Array(
         [
             0, 3, 1, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 528, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 528, new Float32Array(
         [
             1, 0.5, 0, 0
         ]
@@ -203,12 +203,12 @@ function render() {
     }
 
     // 颜.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 768, new Uint32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 768, new Uint32Array(
         [
             0, 3, 0, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 784, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 784, new Float32Array(
         [
             0.25, 0.25, 0, 0
         ]
@@ -238,12 +238,12 @@ function render() {
         )
     }
     
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 0, new Uint32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 0, new Uint32Array(
         [
             0, 4, 3, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 16, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 16, new Float32Array(
         [
             1, 1, 0, 0
         ]
@@ -264,22 +264,22 @@ function render() {
     view_ui.createLoadRenderPass();
 
     // View2D UI
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1024, new Uint32Array(
     //     [
     //         1, 8, 5, 3
     //     ]
     // ));
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
+    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1040, new Float32Array(
     //     [
     //         1440/4096, 1440/4096, 0/4096, 0/4096
     //     ]
     // ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1024, new Uint32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1024, new Uint32Array(
         [
             1, 8, 3, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 1040, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1040, new Float32Array(
         [
             200/4096, 200/4096, 1220/4096, 2/4096
         ]

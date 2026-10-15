@@ -7,32 +7,49 @@ import {
     SkyBox,
 } from "../../../../Module.js";
 
+/**
+ * WebGPU渲染器
+ * 管理GPU资源、命令编码，维护绑定组布局，用于场景渲染
+ *
+ * ## BindGroup 布局约定
+ * - group(0)
+ *   - binding(0): 节点索引数据，支持动态偏移 buffer
+ *   - binding(1): 材质数据，支持动态偏移 buffer
+ * - group(1): 场景节点、组件存储缓冲区
+ * - group(2): 场景采样器 + 纹理资源
+ * - group(3): 预留，自定义功能扩展
+ *
+ * @class WebGPURenderer
+ */
+
 class WebGPURenderer {
 
     constructor() {
 
     }
-    
-    static config = {
-        ANTI_ALIASING: true,
-        sampleCount: 4,
-        alphaModeList: ['opaque','premultiplied'],
-        alphaMode: ['opaque','premultiplied'][0],
-        depthFormatList: ['depth24plus','depth32float','depth24plus-stencil8'],
-        depthFormat: ['depth24plus','depth32float','depth24plus-stencil8'][0],
-        topologyTypeList: ['point-list','line-list','line-strip','triangle-list','triangle-strip'],
-        topologyType: ['point-list','line-list','line-strip','triangle-list','triangle-strip'][4],
-        cullModeTypeList: ["back","front","none"],
-    }
 
     // rgba8unorm | bgra8unorm？
-    static alphaMode = this.config.alphaModeList[ 1 ];
-    static depthFormat = this.config.depthFormatList[ 0 ];
+    static ENUM_CONFIG = {
+        alphaMode: ['opaque','premultiplied'],
+        depthFormat: ['depth24plus','depth32float','depth24plus-stencil8'],
+        topologyType: ['point-list','line-list','line-strip','triangle-list','triangle-strip'],
+        cullModeType: ["back","front","none"],
+    }
+
+    static config = {
+        sampleCount: 4,
+        DynamicOffset_SLOT_SIZE: 256, // ≥ minUniformBufferOffsetAlignment
+        RENDER_STRUCT_COUNT: 4 * 4 *2,
+        DRAW_CALL_COUNT: 100,
+        DRAW_CALL_INDEX: 0,
+
+        alphaMode: this.ENUM_CONFIG.alphaMode[0],
+        depthFormat: this.ENUM_CONFIG.depthFormat[0],
+        topologyType: this.ENUM_CONFIG.topologyType[0],
+        cullModeType: this.ENUM_CONFIG.cullModeType[0],
+    }
+
         
-    static DynamicOffset_SLOT_SIZE = 256; // ≥ minUniformBufferOffsetAlignment
-    static RENDER_STRUCT_COUNT = 4 * 4 *2;
-    static DRAW_CALL_COUNT = 100;
-    static DRAW_CALL_INDEX = 0;
 
 
     static shaderCode = {
@@ -54,13 +71,13 @@ class WebGPURenderer {
     static BindGrouplayout = {
         _1: null,
         _2: null,
-        _1: null,
-        _1: null,
+        _3: null,
+        _4: null,
     }
 
     static Resource = {
         Uniform: {
-            _: null
+            DynamicOffset_vertex: null
         },
         StorageBuffers: {
             WorldMatrix4x4Array: null,
@@ -124,30 +141,15 @@ class WebGPURenderer {
             console.warn('WebGPU init reject:', error);
         }
 
-        // WebGPURenderer.initShaderModule();
         WebGPURenderer.shaderCode.default = await Loader.readText( new URL('../wgsl/WebGPURenderer.default.wgsl',import.meta.url).href );
         WebGPURenderer.shaderModule.default = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.default,label:'WebGPURenderer.default' });
         WebGPURenderer.shaderCode.skyBox = await Loader.readText( new URL('../wgsl/SkyBox.wgsl',import.meta.url).href );
         WebGPURenderer.shaderModule.skyBox = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.skyBox,label:'skyBox' });
 
-        // WebGPURenderer.shaderCode.VertexUvNormal = await Loader.readText( new URL('../wgsl/invoke/Vertex.VertexUvNormal.wgsl',import.meta.url).href );
-        // WebGPURenderer.shaderModule.VertexUvNormal = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.VertexUvNormal,label:'VertexUvNormal' });
-        // WebGPURenderer.shaderCode.Material_Basic = await Loader.readText( new URL('../wgsl/invoke/Fragment.Material.Basic.wgsl',import.meta.url).href );
-        // WebGPURenderer.shaderModule.Material_Basic = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.Material_Basic,label:'Material_Basic' });
-
         WebGPURenderer.initBindGrouplayout();
 
         return WebGPURenderer.status.isInitGraphicsApied;
     }
-
-    // static async initShaderModule() {
-    //     WebGPURenderer.shaderCode.VertexUvNormal = await Loader.readText( new URL('../wgsl/invoke/Vertex.VertexUvNormal.wgsl',import.meta.url).href );
-    //     WebGPURenderer.shaderCode.Material_Basic = await Loader.readText( new URL('../wgsl/invoke/Fragment.Material.Basic.wgsl',import.meta.url).href );
-    //     WebGPURenderer.shaderModule.VertexUvNormal = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.VertexUvNormal,label:'VertexUvNormal' });
-    //     WebGPURenderer.shaderModule.Material_Basic = WebGPURenderer.device.createShaderModule({ code: WebGPURenderer.shaderCode.Material_Basic,label:'Material_Basic' });
-
-    //     // WebGPURenderer.createPipelines();
-    // }
 
     static async createPipelines() {
         // skybox
@@ -164,12 +166,12 @@ class WebGPURenderer {
                 SkyBox.bindGroupLayout,
             ],
             primitive: {
-                topology: WebGPURenderer.config.topologyTypeList[3],
+                topology: WebGPURenderer.ENUM_CONFIG.topologyType[3],
                 cullMode: 'front', // "back" "front" "none"
                 frontFace: 'ccw'
             },
             depthStencil: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 depthWriteEnabled: false,
                 depthCompare: 'less-equal',
             },
@@ -192,12 +194,12 @@ class WebGPURenderer {
                 WebGPURenderer.BindGrouplayout._2,
             ],
             primitive: {
-                topology: WebGPURenderer.config.topologyTypeList[3],
+                topology: WebGPURenderer.ENUM_CONFIG.topologyType[3],
                 cullMode: 'back',
                 frontFace: 'ccw'
             },
             depthStencil: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 depthWriteEnabled: true,
                 depthCompare: 'less',
             },
@@ -207,6 +209,8 @@ class WebGPURenderer {
                 alphaToCoverageEnabled: false
             }
         });
+
+        // UI2D
         this.Pipelinelist.UI = await RenderPipeline.createVertexUvNormalPipeline({
             vertexShaderModule: WebGPURenderer.shaderModule.default,
             fragmentShaderModule: WebGPURenderer.shaderModule.default,
@@ -218,12 +222,12 @@ class WebGPURenderer {
                 WebGPURenderer.BindGrouplayout._2,
             ],
             primitive: {
-                topology: WebGPURenderer.config.topologyTypeList[3],
+                topology: WebGPURenderer.ENUM_CONFIG.topologyType[3],
                 cullMode: 'back',
                 frontFace: 'ccw'
             },
             depthStencil: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 depthWriteEnabled: false,
                 depthCompare: 'less',
             },
@@ -233,6 +237,7 @@ class WebGPURenderer {
                 alphaToCoverageEnabled: false
             }
         });
+        
         // line
         this.Pipelinelist.Line = await RenderPipeline.createVertexUvNormalPipeline({
             vertexShaderModule: WebGPURenderer.shaderModule.default,
@@ -245,12 +250,12 @@ class WebGPURenderer {
                 WebGPURenderer.BindGrouplayout._2,
             ],
             primitive: {
-                topology: WebGPURenderer.config.topologyTypeList[1],
+                topology: WebGPURenderer.ENUM_CONFIG.topologyType[1],
                 cullMode: 'back',
                 frontFace: 'ccw'
             },
             depthStencil: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 depthWriteEnabled: true,
                 depthCompare: 'less',
             },
@@ -277,7 +282,7 @@ class WebGPURenderer {
                         type:"uniform",
                         dynamic: true,
                         hasDynamicOffset: true,
-                        minBindingSize: WebGPURenderer.RENDER_STRUCT_COUNT,   // 告诉 GPU 每个槽位至少读 16 字节
+                        minBindingSize: WebGPURenderer.config.RENDER_STRUCT_COUNT,   // 告诉 GPU 每个槽位至少读 16 字节
                     }
                 },
             ]
@@ -357,9 +362,9 @@ class WebGPURenderer {
             baseMipLevel: 0
         });
 
-        this.Resource.Uniform._ = this.device.createBuffer({
+        this.Resource.Uniform.DynamicOffset_vertex = this.device.createBuffer({
             label: 'ubo-dynamic',
-            size: WebGPURenderer.DynamicOffset_SLOT_SIZE * WebGPURenderer.DRAW_CALL_COUNT,
+            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
         
@@ -428,9 +433,9 @@ class WebGPURenderer {
                     {
                         binding: 0,
                         resource: {
-                            buffer: this.Resource.Uniform._,
+                            buffer: this.Resource.Uniform.DynamicOffset_vertex,
                             offset: 0,
-                            size: WebGPURenderer.DynamicOffset_SLOT_SIZE,   // ← 关键：一个槽位的大小
+                            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE,   // ← 关键：一个槽位的大小
                         },
                     }
                 ]
@@ -496,7 +501,31 @@ class WebGPURenderer {
         if ( !WebGPURenderer.update() ) return;
     }
 
-    static drawGeometry( pass, drawParameter = {} ) {
+    static updateGeometryBuffer( geometry ) {
+        if ( !geometry ) return;
+        if ( geometry.need.updateWebGPUBuffer ) {
+            geometry.updateAttribute();
+            geometry.WebGPUBuffer.indicesBuffer = WebGPURenderer.setUint16ArrayBuffer( geometry.attribute.indices );
+            geometry.WebGPUBuffer.verticesBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.vertices );
+            geometry.WebGPUBuffer.uvsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.uvs );
+            geometry.WebGPUBuffer.normalsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.normals );
+            geometry.need.updateWebGPUBuffer = false;
+        }
+    }
+    
+    static updateSkinGeometryBuffer( geometry ) {
+        if ( !geometry ) return;
+        if ( geometry.need.updateWebGPUBuffer ) {
+            geometry.updateAttribute();
+            geometry.WebGPUBuffer.indicesBuffer = WebGPURenderer.setUint16ArrayBuffer( geometry.attribute.indices );
+            geometry.WebGPUBuffer.verticesBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.vertices );
+            geometry.WebGPUBuffer.uvsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.uvs );
+            geometry.WebGPUBuffer.normalsBuffer = WebGPURenderer.setFloat32ArrayBuffer( geometry.attribute.normals );
+            geometry.need.updateWebGPUBuffer = false;
+        }
+    }
+
+    static draw_indexed( pass, drawParameter = {} ) {
         if ( !pass ) return;
         if ( !drawParameter.indexCount || typeof drawParameter.indexCount !== 'number' ) drawParameter.indexCount = 0;
         if ( !drawParameter.instanceCount || typeof drawParameter.instanceCount !== 'number' ) drawParameter.instanceCount = 1;

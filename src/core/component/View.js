@@ -63,7 +63,7 @@ class View extends ComponentBase {
         canvas['__cycles__'].depthTexture = WebGPURenderer.device.createTexture({
             size: [ canvas.width, canvas.height],
             sampleCount: WebGPURenderer.config.sampleCount,
-            format: WebGPURenderer.depthFormat,
+            format: WebGPURenderer.config.depthFormat,
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
         canvas['__cycles__'].depthTextureView = canvas['__cycles__'].depthTexture.createView()
@@ -84,7 +84,7 @@ class View extends ComponentBase {
     }
 
     static clearColor( canvas ) {
-        WebGPURenderer.DRAW_CALL_INDEX = 0;
+        WebGPURenderer.config.DRAW_CALL_INDEX = 0;
         const pass = this.encoder.beginRenderPass({
             colorAttachments: [{
                 view: canvas['__cycles__'].multisampleTextureView,
@@ -95,7 +95,7 @@ class View extends ComponentBase {
             }],
 
             depthStencilAttachment: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 view: canvas['__cycles__'].depthTextureView,
                 depthLoadOp: 'clear',
                 depthStoreOp: "store",
@@ -169,7 +169,6 @@ class View extends ComponentBase {
             this.viewMatrix4x4 = this.#node.Matrices.inverseWorldMatrix4x4;
         }
         if ( this.camera.status.hasChangeProjectionMatrix4x4 || this.#node.status.hasChangeWorldMatrix4x4) {
-        // console.log(1)
             this.cameraViewMatrix4x4.element = Matrix4x4.multiply(this.viewMatrix4x4.element, this.camera.projectionMatrix4x4.element )
             this.camera.status.hasChangeProjectionMatrix4x4 = false;
         }
@@ -187,7 +186,7 @@ class View extends ComponentBase {
             }],
 
             depthStencilAttachment: {
-                format: WebGPURenderer.depthFormat,
+                format: WebGPURenderer.config.depthFormat,
                 view: this.canvas['__cycles__'].depthTextureView,
                 depthLoadOp: 'load',
                 depthStoreOp: "store",

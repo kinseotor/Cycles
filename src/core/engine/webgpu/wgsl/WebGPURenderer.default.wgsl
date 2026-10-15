@@ -24,7 +24,7 @@ struct textureParameter {
     offsetY: f32,
 }
 
-struct MaterialProperty {
+struct DynamicOffset_MaterialProperty {
     // ========= glTF PBR 标准【通用段】=========
     baseColorFactor: vec4<f32>,          // 基础颜色 RGBA
     emissiveFactor: vec4<f32>,           // 自发光 RGB,A占位
@@ -70,10 +70,12 @@ struct DynamicOffset {
     offsetX: f32,
     offsetY: f32,
 }
+
 // ---------------------------------------------------------
 
 // @group(0)
-@group(0) @binding(0) var<uniform> dynamicOffset: DynamicOffset;
+@group(0) @binding(0) var<uniform> dynamicOffset_vertex: DynamicOffset;
+@group(0) @binding(0) var<uniform> material: DynamicOffset_MaterialProperty;
 // @group(1)
 @group(1) @binding(0) var<storage, read> worldMatrix4x4Array: array<mat4x4<f32>>;
 @group(1) @binding(1) var<storage, read> cameraViewMatrix4x4: array<mat4x4<f32>>;
@@ -90,7 +92,7 @@ struct DynamicOffset {
 fn vs_VertexUvNormal(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
     var output: Varying_VertexUvNormal;
 
-    output.position = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( input.position, 1.0);
+    output.position = cameraViewMatrix4x4[dynamicOffset_vertex.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset_vertex.index_worldMatrix] * vec4<f32>( input.position, 1.0);
     output.uvs = input.uvs;
     output.normals = input.normals;
     output.fragmentPos = input.position;
@@ -104,8 +106,8 @@ fn fs_BasicMaterial(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
     var tex:vec4<f32> = textureSample(
         baseColorTexture,
         baseColorSampler,
-        vec2(input.uvs.x*dynamicOffset.width + dynamicOffset.offsetX,input.uvs.y*dynamicOffset.height + dynamicOffset.offsetY),
-        u32(dynamicOffset.index_useTexture)
+        vec2(input.uvs.x*dynamicOffset_vertex.width + dynamicOffset_vertex.offsetX,input.uvs.y*dynamicOffset_vertex.height + dynamicOffset_vertex.offsetY),
+        u32(dynamicOffset_vertex.index_useTexture)
     );
 
     return tex;
@@ -116,7 +118,7 @@ fn fs_BasicMaterial(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
 @vertex
 fn vs_Line(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
     var output: Varying_VertexUvNormal;
-    output.position = cameraViewMatrix4x4[dynamicOffset.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset.index_worldMatrix] * vec4<f32>( input.position, 1.0);
+    output.position = cameraViewMatrix4x4[dynamicOffset_vertex.index_cameraViewMatrix] * worldMatrix4x4Array[dynamicOffset_vertex.index_worldMatrix] * vec4<f32>( input.position, 1.0);
     return output;
 }
 
