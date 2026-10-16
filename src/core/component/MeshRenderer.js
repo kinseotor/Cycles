@@ -41,6 +41,10 @@ class MeshRenderer {
 
         }
     }
+
+    drawMesh( mesh, node ) {
+        MeshRenderer.drawMesh( mesh, node )
+    }
 }
 
 export { MeshRenderer }

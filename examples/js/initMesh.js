@@ -83,6 +83,9 @@ console.log( model.mesh.childrenMeshList )
 // mesh.geometry = model;
 // console.log(mesh,model)
 
+const renderer = new Cycles.MeshRenderer();
+
+
 let frameCount = 0;
 function render() {
     // node1.rotation.y = frameCount/10;
@@ -95,148 +98,6 @@ function render() {
     Cycles.View.createCommandEncoder();
     Cycles.View.clearColor(canvas);
     view.createLoadRenderPass();
-    
-    // sky box
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 256, new Uint32Array(
-    //     [
-    //         0, 0, 5, 3
-    //     ]
-    // ));
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform._, 272, new Float32Array(
-    //     [
-    //         1440/4096, 1440/4096, 0/4096, 0/4096
-    //     ]
-    // ));
-    // view.pass.setBindGroup( 3, Cycles.SkyBox.bindGroup);
-    // view.drawGeometry(
-    //     Cycles.WebGPURenderer.Pipelinelist.SkyBox,
-    //     Cycles.SkyBox.geometry,
-    //     {
-    //         offset: 256,
-    //     },
-    //     {
-    //     }
-    // );
-
-    // 髪.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256, new Uint32Array(
-        [
-            0, 3, 2, 3
-        ]
-    ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 272, new Float32Array(
-        [
-            0.5, 0.5, 0, 0
-        ]
-    ));
-    let mat_arr6 = [
-        23889, 42183,
-        516,66072
-    ]
-    
-    for (let i = 0; i < mat_arr6.length; i += 2) {
-        view.drawGeometry(
-            Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model.skinGeometry,
-            {
-                offset: 256,
-            },
-            {
-                indexCount: mat_arr6[i],
-                firstIndex: mat_arr6[i + 1],
-            }
-        )
-    }
-
-    // 衣.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 512, new Uint32Array(
-        [
-            0, 3, 1, 3
-        ]
-    ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 528, new Float32Array(
-        [
-            1, 0.5, 0, 0
-        ]
-    ));
-    let mat_arr4 = [
-        23001,19182,
-        16269,66588,
-        498,82857,
-        1959,83355,
-        4038,87771,
-        2760,91809,
-        5040,94569,
-        60,99609,
-        60,99669,
-        732,99729,
-        1866,100461,
-        5898,102327,
-        14997,108225,
-        5856,123222,
-        5856,129078,
-        12411,134934,
-        10455,147345,
-        2148,157800,
-        612,159948,
-        1458,161172,
-        1458,162630,
-        552,164088,
-        552,164640,
-        738,165192,
-        738,165930
-    ]
-
-    for (let i = 0; i < mat_arr4.length; i += 2) {
-
-        view.drawGeometry(
-            Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model.skinGeometry,
-            {
-                offset: 512,
-            },
-            {
-                indexCount: mat_arr4[i],
-                firstIndex: mat_arr4[i + 1],
-            }
-        )
-    }
-
-    // 颜.png
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 768, new Uint32Array(
-        [
-            0, 3, 0, 3
-        ]
-    ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 784, new Float32Array(
-        [
-            0.25, 0.25, 0, 0
-        ]
-    ));
-    let mat_arr2 = [
-        6924,0,
-        1188,13848,
-        600,15036,
-        672,15636,
-        1230,16308,
-        360,17538, 
-        1284,17898
-    ]
-    
-    for (let i = 0; i < mat_arr2.length; i += 2) {
-
-        view.drawGeometry(
-            Cycles.WebGPURenderer.Pipelinelist.BasicMaterial,
-            model.skinGeometry,
-            {
-                offset: 768,
-            },
-            {
-                indexCount: mat_arr2[i],
-                firstIndex: mat_arr2[i + 1],
-            }
-        )
-    }
     
     Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 0, new Uint32Array(
         [

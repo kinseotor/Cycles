@@ -10,7 +10,7 @@ import * as Utility from './core/math/Utility.js'
 
 import { ComponentBase } from './core/component/ComponentBase.js'
 import { View } from './core/component/View.js'
-
+import { MeshRenderer } from './core/component/MeshRenderer.js'
 import { Mesh, childrenMesh } from './core/data/mesh/Mesh.js'
 
 import { DataBase } from './core/data/DataBase.js'
@@ -58,6 +58,7 @@ export {
     // world
     Node,Scene,
     Engine, WebGPU, WebGPURenderer, RenderPipeline,
+    MeshRenderer,
     //
     SkyBox,
     // 
