@@ -46,28 +46,29 @@ class childrenMesh {
             instanceCount: 1,
             firstIndex: 0,
         }
-
-        if (!config.indexCount) {
-            this.property.indexCount = 0;
-        } else if ( typeof config.indexCount === 'number' ) {
-            this.property.indexCount = config.indexCount;
-        }
-
-        if (!config.instanceCount) {
-            this.property.instanceCount = 1;
-        } else if ( typeof config.instanceCount === 'number' ) {
-            this.property.instanceCount = config.instanceCount;
-        }
-
-        if (!config.firstIndex) {
-            this.property.firstIndex = 0;
-        } else if ( typeof config.firstIndex === 'number' ) {
-            this.property.firstIndex = config.firstIndex;
-        }
-
         this.status = {
-            visible: true,
+            visibility: true,
         };
+
+        if (!config.property.indexCount) {
+            this.property.indexCount = 0;
+        } else if ( typeof config.property.indexCount === 'number' ) {
+            this.property.indexCount = config.property.indexCount;
+        }
+
+        if (!config.property.instanceCount) {
+            this.property.instanceCount = 1;
+        } else if ( typeof config.property.instanceCount === 'number' ) {
+            this.property.instanceCount = config.property.instanceCount;
+        }
+
+        if (!config.property.firstIndex) {
+            this.property.firstIndex = 0;
+        } else if ( typeof config.property.firstIndex === 'number' ) {
+            this.property.firstIndex = config.property.firstIndex;
+        }
+
+        this.status.visibility = config.status.visibility;
     }
 
     set material(material) {

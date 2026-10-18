@@ -10,7 +10,7 @@ import {
 
 class View extends ComponentBase {
 
-    static instance_index = 0;
+    static INSTANCE_INDEX = 0;
     static INSTANCE_LIST = [];
     static StorageBuffers = {
         CameraViewMatrix4x4Array: [],
@@ -143,9 +143,12 @@ class View extends ComponentBase {
             enableScissorRect: false,
         }
 
-        this.instance_index = View.instance_index++;
+        this._instance_index = View.INSTANCE_INDEX++;
         View.add(this);
 
+    }
+    get instance_index() {
+        return this._instance_index;
     }
     #node = null;
     setNode( node ) {
@@ -234,7 +237,7 @@ class View extends ComponentBase {
         }
 
         this.pass.setPipeline( Pipeline );
-        this.pass.setBindGroup( 0, WebGPURenderer.b0, [ renderConfig.offset ] );
+        this.pass.setBindGroup( 0, WebGPURenderer.b0, [ renderConfig.offset, 0 ] );
         this.pass.setIndexBuffer( geometry.WebGPUBuffer.indicesBuffer, 'uint16');
         
         this.pass.setVertexBuffer(0, geometry.WebGPUBuffer.verticesBuffer);

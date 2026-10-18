@@ -285,6 +285,16 @@ class WebGPURenderer {
                         minBindingSize: WebGPURenderer.config.RENDER_STRUCT_COUNT,   // 告诉 GPU 每个槽位至少读 16 字节
                     }
                 },
+                {
+                    binding:1,
+                    visibility:GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type:"uniform",
+                        dynamic: true,
+                        hasDynamicOffset: true,
+                        minBindingSize: 240,
+                    }
+                },
             ]
         });
         WebGPURenderer.BindGrouplayout._1 = WebGPURenderer.device.createBindGroupLayout({
@@ -345,7 +355,7 @@ class WebGPURenderer {
             size: {
                 width: Texture2D.defaultWidth,
                 height: Texture2D.defaultHeight,
-                depthOrArrayLayers: Texture2D.defaultDepth  // 添加这个字段
+                depthOrArrayLayers: Texture2D.defaultDepth
             },
             arrayLayerCount: Texture2D.defaultDepth,  // 这个可以保留作为冗余说明
             
@@ -368,6 +378,11 @@ class WebGPURenderer {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
         
+        this.Resource.Uniform.DynamicOffset_fragment = this.device.createBuffer({
+            label: 'ubo-dynamic',
+            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
     }
 
     static writeTexture( imageBitmap, index = 0, x = 0, y = 0 ) {
@@ -421,7 +436,11 @@ class WebGPURenderer {
         WebGPURenderer.device.queue.writeBuffer( WebGPURenderer.Resource.StorageBuffers.WorldMatrix4x4Array, 0, new Float32Array(
             Node.StorageBuffers.WorldMatrix4x4Array
         ));
-        Texture2D.update();
+        // Texture2D.update();
+    }
+
+    static updateTextureArray(){
+        
     }
 
     static updateBindGroup() {
@@ -437,7 +456,15 @@ class WebGPURenderer {
                             offset: 0,
                             size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE,   // ← 关键：一个槽位的大小
                         },
-                    }
+                    },
+                    {
+                        binding: 1,
+                        resource: {
+                            buffer: this.Resource.Uniform.DynamicOffset_fragment,
+                            offset: 0,
+                            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE,   // ← 关键：一个槽位的大小
+                        },
+                    },
                 ]
             });
             this.status.updateBindGroup[0] = false;
@@ -499,6 +526,45 @@ class WebGPURenderer {
 
     static render() {
         if ( !WebGPURenderer.update() ) return;
+    }
+
+    static _set() {
+        var i = 0;
+        WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
+            [
+                0, 0, 0, 0
+            ]
+        ));
+        WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
+        [
+            2048/4096, 2048/4096, 0/4096, 0/4096
+        ]
+    ));
+    }
+
+    static drawMesh( mesh, view, node ) {
+        if ( !mesh ) return;
+        this.#set( mesh.geometry, view.pass, this.Pipelinelist.BasicMaterial, {} )
+        for (let childrenMesh of mesh.childrenMeshList ) {
+            if (childrenMesh.status.visibility) this.draw_indexed( view.pass, childrenMesh.property )
+        }
+    }
+
+    static #set( geometry, pass, pipeline, renderConfig = {} ) {
+        if ( geometry.need.updateWebGPUBuffer ) {
+            this.updateGeometryBuffer( geometry );
+        }
+
+        if ( !renderConfig.offset || typeof renderConfig.offset !== 'number' ) renderConfig.offset = 0;
+
+        pass.setPipeline( pipeline );
+        pass.setBindGroup( 0, WebGPURenderer.b0, [ 256 * 0 , 0 ] );
+        pass.setIndexBuffer( geometry.WebGPUBuffer.indicesBuffer, 'uint16');
+        
+        pass.setVertexBuffer(0, geometry.WebGPUBuffer.verticesBuffer);
+        pass.setVertexBuffer(1, geometry.WebGPUBuffer.uvsBuffer );
+        pass.setVertexBuffer(2, geometry.WebGPUBuffer.normalsBuffer );
+
     }
 
     static updateGeometryBuffer( geometry ) {

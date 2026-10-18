@@ -80,6 +80,7 @@ class Node {
 
     constructor( config = {} ) {
         this.name = 'node.' + Node.INSTANCE_INDEX++;
+        this._instance_index = Node.INSTANCE_INDEX;
 
         this.scale = new Vector3( 1, 1, 1 );
         this.rotation = new Vector3();
@@ -118,6 +119,10 @@ class Node {
         return this._type;
     }
 
+    get instance_index() {
+        return this._instance_index;
+    }
+    
     removeChild(...nodes) { // Node -> this
         for ( const node of nodes ) {
             const index = this.children.indexOf(node);

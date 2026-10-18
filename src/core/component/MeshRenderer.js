@@ -13,37 +13,8 @@ class MeshRenderer {
         useWebGPU: true,
     }
 
-    static drawMesh( mesh, node ) {
-        if ( !mesh ) return;
-        for (let childrenMesh of mesh.childrenMeshList ) {
-
-        }
-    }
-    
-    static _() {
-        if ( geometry.need.updateWebGPUBuffer ) {
-            this.updateGeometryBuffer( geometry );
-        }
-
-        view.pass.setPipeline( Pipeline );
-        view.pass.setBindGroup( 0, WebGPURenderer.b0, [ renderConfig.offset ] );
-        view.pass.setIndexBuffer( geometry.WebGPUBuffer.indicesBuffer, 'uint16');
-        
-        view.pass.setVertexBuffer(0, geometry.WebGPUBuffer.verticesBuffer);
-        view.pass.setVertexBuffer(1, geometry.WebGPUBuffer.uvsBuffer );
-        view.pass.setVertexBuffer(2, geometry.WebGPUBuffer.normalsBuffer );
-
-        if ( !renderConfig.offset || typeof renderConfig.offset !== 'number' ) renderConfig.offset = 0;
-    }
-
-    static set__webgpu__Parameters(array) {
-        if ( !Array.isArray(array) ) {
-
-        }
-    }
-
-    drawMesh( mesh, node ) {
-        MeshRenderer.drawMesh( mesh, node )
+    drawMesh( mesh, view, node ) {
+        if (MeshRenderer.status.useWebGPU) WebGPURenderer.drawMesh( mesh, view, node )
     }
 }
 

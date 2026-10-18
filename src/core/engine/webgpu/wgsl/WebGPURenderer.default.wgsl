@@ -13,15 +13,13 @@ struct Varying_VertexUvNormal {
     @location(2) fragmentPos: vec3<f32>,
 };
 
-struct textureParameter {
-    location: u32,
-    pivot: vec2<f32>,
+struct TextureParameter {
+    location: f32,
     rotated: f32,
-
-    width: f32,
-    height: f32,
-    offsetX: f32,
-    offsetY: f32,
+    _pad0: f32,
+    _pad1: f32,
+    size: vec2<f32>,
+    position: vec2<f32>,
 }
 
 struct DynamicOffset_MaterialProperty {
@@ -75,13 +73,14 @@ struct DynamicOffset {
 
 // @group(0)
 @group(0) @binding(0) var<uniform> dynamicOffset_vertex: DynamicOffset;
-@group(0) @binding(0) var<uniform> material: DynamicOffset_MaterialProperty;
+@group(0) @binding(1) var<uniform> dynamicOffset_fragment: DynamicOffset_MaterialProperty;
 // @group(1)
 @group(1) @binding(0) var<storage, read> worldMatrix4x4Array: array<mat4x4<f32>>;
 @group(1) @binding(1) var<storage, read> cameraViewMatrix4x4: array<mat4x4<f32>>;
 // @group(2)
 @group(2) @binding(0) var baseColorSampler: sampler;
 @group(2) @binding(1) var baseColorTexture: texture_2d_array<f32>;
+@group(2) @binding(2) var<storage, read> textureParameterArray: array<TextureParameter>;
 
 // @group(3)
 // @group(3) @binding(0) var<uniform> u : Uniforms;
@@ -102,6 +101,8 @@ fn vs_VertexUvNormal(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
 
 @fragment
 fn fs_BasicMaterial(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
+
+    var bs:vec4<f32> = dynamicOffset_fragment.baseColorFactor;
 
     var tex:vec4<f32> = textureSample(
         baseColorTexture,
@@ -124,6 +125,7 @@ fn vs_Line(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
 
 @fragment
 fn fs_Line(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
+    var bs:vec4<f32> = dynamicOffset_fragment.baseColorFactor;
     return vec4<f32>(1,1,1,0.2);
 }
 

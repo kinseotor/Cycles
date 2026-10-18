@@ -111,14 +111,15 @@ class Texture2D extends DataBase{
             isInGPU: false,
         }
         this.url = config.url;
+        this.frames = null;
 
         if ( typeof this.url === 'string' ) {
             // this.load( this.url);
         } else {
             this.clear();
         }
-        this.instance_index = Texture2D.INSTANCE_INDEX++;
-        Texture2D.INSTANCE_LIST.push(this);
+        // this.instance_index = Texture2D.INSTANCE_INDEX++;
+        // Texture2D.INSTANCE_LIST.push(this);
     }
 
     set res( res ) {
@@ -154,7 +155,7 @@ class Texture2D extends DataBase{
         return this._url;
     }
 
-    load( url = this._url , call = null ) {
+    load( url = this._url , array ) {
         if ( !url ) return;
         this.status.value = 2;
         const promise = Texture2D.loadImageBitmap(url);
@@ -162,7 +163,7 @@ class Texture2D extends DataBase{
             this._url = url;
             this.res?.close?.();
             this.res = img;
-            if( typeof call === 'function'){
+            if( Array.isArray(array) ){
                 call(img);
             }
         })
@@ -208,18 +209,55 @@ class Texture2D extends DataBase{
     }
 }
 
-class TextureArrayManager {
-    static load() {
+class TextureArray {
+    static defaultWidth = 1024*4;
+    static defaultHeight = 1024*4;
+    static defaultDepth = 32;
 
+    constructor() {
+        this.url = new Array( TextureArray.defaultDepth );
+        this.element = new Array( TextureArray.defaultDepth );
+        this.count = 0;
+
+        for (let i = 0; i < TextureArray.defaultDepth; i++) {
+            this.element[i] = new Texture2D();
+        }
     }
 
-    static loadMulti( array ) {
+    /**
+     * 
+     * @param { string } array 
+     */
+    loadMulti( array ) {
         if ( Array.isArray( array ) ) {
             for (let url of array ) {
                 if( typeof url === 'string' )this.load( url );
             }
         }
     }
+
+    clearAll() {
+
+    }
+
+    update() {
+        let index = 0;
+        for ( let texture2d of this.element ) {
+            if ( index === TextureArray.defaultDepth ) break;
+            if ( texture2d.status.value === 1 ) {
+                texture2d.load();
+                texture2d.status.value = 2;
+            }
+            if ( texture2d.status.value === 3 && !texture2d.status.isInGPU) {
+                WebGPURenderer.writeTexture( texture2d.res, index )
+                texture2d.status.isInGPU = true;
+            }
+            index++;
+        }
+    }
+
 }
 
-export { Texture2D, TextureArrayManager }
+console.log(new TextureArray())
+
+export { Texture2D, TextureArray }

@@ -28,7 +28,7 @@ node5.addChild( // ui root
 node0.position.set(0, 0, 0);
 node1.position.set(0, 1.2, 0); // camera orbit node
 node1.rotation.set(0, 0, 0);
-node2.position.set(0, 0, 20); // camera
+node2.position.set(0, 0, 2); // camera
 node3.position.set(0, 0, 0);
 node4.rotation.set(0, 0, 0);
 
@@ -76,15 +76,19 @@ const pmxpath = [
 
 ]
 const pmxloader = new Cycles.PMXLoader();
-let model = await pmxloader.load(pmxpath[2]);
+let model = await pmxloader.load(pmxpath[0]);
 console.log( model.mesh.childrenMeshList )
+
+const gltfloader = new Cycles.GLTFLoader()
+let vrm = await gltfloader.loadGLB('../assets/vrm/ly.vrm')
+console.log(vrm.gltf)
 
 // const mesh = new Cycles.Mesh();
 // mesh.geometry = model;
 // console.log(mesh,model)
 
 const renderer = new Cycles.MeshRenderer();
-
+Cycles.WebGPURenderer._set();
 
 let frameCount = 0;
 function render() {
@@ -99,12 +103,13 @@ function render() {
     Cycles.View.clearColor(canvas);
     view.createLoadRenderPass();
     
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 0, new Uint32Array(
+    var i = 5;
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
         [
             0, 4, 3, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 16, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
         [
             1, 1, 0, 0
         ]
@@ -113,34 +118,26 @@ function render() {
         Cycles.WebGPURenderer.Pipelinelist.Line,
         xyz,
         {
-            offset: 0,
+            offset: 256*i,
         },
         {
 
         }
     );
 
+    renderer.drawMesh( model.mesh, view, node0 )
+
     view.end();
 
     view_ui.createLoadRenderPass();
 
-    // View2D UI
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1024, new Uint32Array(
-    //     [
-    //         1, 8, 5, 3
-    //     ]
-    // ));
-    // Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1040, new Float32Array(
-    //     [
-    //         1440/4096, 1440/4096, 0/4096, 0/4096
-    //     ]
-    // ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1024, new Uint32Array(
+    i = 6;
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
         [
             1, 8, 3, 3
         ]
     ));
-    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 1040, new Float32Array(
+    Cycles.WebGPURenderer.device.queue.writeBuffer(Cycles.WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
         [
             200/4096, 200/4096, 1220/4096, 2/4096
         ]
@@ -149,7 +146,7 @@ function render() {
         Cycles.WebGPURenderer.Pipelinelist.UI,
         sprite,
         {
-            offset: 1024,
+            offset: 256*i,
         },
         {
 
@@ -167,25 +164,8 @@ function animation() {
     render();
     requestAnimationFrame(animation);
 }
-// render();
-// setInterval(render,2000)
+
 animation()
-
-new Cycles.Texture2D().url = '../assets/pmx/xd/颜.png';
-new Cycles.Texture2D().url = '../assets/pmx/xd/衣.png';
-new Cycles.Texture2D().url = '../assets/pmx/xd/髪.png';
-new Cycles.Texture2D().url = '../assets/binding/atlas/UI.png';
-new Cycles.Texture2D().url = '../assets/images/brny.jpg';
-new Cycles.Texture2D().url = '../assets/images/file-7iowdg9qpgxs.jpg';
-new Cycles.Texture2D().url = '../assets/pmx/zgn/衣.png';
-new Cycles.Texture2D().url = '../assets/pmx/zgn/髪.png';
-new Cycles.Texture2D().url = '../assets/pmx/alxyyz/衣服.png';
-new Cycles.Texture2D().url = '../assets/pmx/alxyyz/头发.png';
-
-// const atlas1 = await Cycles.Loader.readText('/assets/binding/atlas/UI.array.json')
-// console.log(JSON.parse(atlas1))
-// const atlas2 = await Cycles.Loader.readText('/assets/binding/atlas/UI.hash.json')
-// console.log(JSON.parse(atlas2))
 
 function autoFullScreen() {
     Cycles.View.setCanvasSize(canvas, window.innerWidth, window.innerHeight);
