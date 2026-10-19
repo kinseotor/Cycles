@@ -126,7 +126,7 @@ fn vs_Line(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
 @fragment
 fn fs_Line(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
     var bs:vec4<f32> = dynamicOffset_fragment.baseColorFactor;
-    return vec4<f32>(1,1,1,0.2);
+    return vec4<f32>(1,1,1,1);
 }
 
 // ---------------------------------------------------------

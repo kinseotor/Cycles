@@ -32,7 +32,7 @@ class View extends ComponentBase {
         if ( canvas && !canvas['__cycles__']) {
              canvas['__cycles__'] = {
                 context: canvas.getContext('webgpu'),
-                backgroundColor: new Vector4(0.2,0.2,0.2,1),
+                backgroundColor: new Vector4(0.0,0.0,0.0,1),
                 depthTexture: null,
                 multisampleTexture: null,
                 status: {

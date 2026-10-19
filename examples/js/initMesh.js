@@ -66,22 +66,14 @@ const cube = new Cycles.Cube()
 cube.updateAttribute();
 
 const xyz = new Cycles.CoordinateSystem()
-xyz.setShape(100,100,0,10,10)
+xyz.setShape(10,10,0,10,10)
 xyz.updateAttribute();
 
-const pmxpath = [
-    '../assets/pmx/ly/ly.pmx',
-    '../assets/pmx/zgn/zgn.pmx',
-    '../assets/pmx/xd/xd.pmx',
-
-]
-const pmxloader = new Cycles.PMXLoader();
-let model = await pmxloader.load(pmxpath[0]);
-console.log( model.mesh.childrenMeshList )
-
 const gltfloader = new Cycles.GLTFLoader()
-let vrm = await gltfloader.loadGLB('../assets/vrm/ly.vrm')
-console.log(vrm.gltf)
+let vrm = await gltfloader.load('../assets/vrm/ly.vrm',( model ) => {
+    console.log('call');
+})
+console.log(vrm.gltf.materials[0])
 
 // const mesh = new Cycles.Mesh();
 // mesh.geometry = model;
@@ -125,7 +117,7 @@ function render() {
         }
     );
 
-    renderer.drawMesh( model.mesh, view, node0 )
+    // renderer.drawMesh( model.mesh, view, node0 )
 
     view.end();
 

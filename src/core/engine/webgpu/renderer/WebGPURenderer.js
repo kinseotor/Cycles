@@ -267,7 +267,6 @@ class WebGPURenderer {
         });
         WebGPURenderer.status.isCreatePipelinesed = true;
         this.initDataResource();
-        console.log(WebGPURenderer.Pipelinelist)
         return this;
     }
 
