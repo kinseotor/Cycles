@@ -16,11 +16,7 @@
     
     <script type="module">
 
-        import * as Cycles from "@cycles/core"
-        import { Input } from "@cycles/input"
-
-        window.Cycles = Cycles;
-        window.Input = Input;
+        import { WebGPURenderer, SkyBox } from "@cycles/core"
         
         const script_menu = [
             './js/initMesh.js',
@@ -37,11 +33,11 @@
             script.src = script_menu[index];
         }
 
-        Cycles.WebGPURenderer.init().then((r) => {
+        WebGPURenderer.init().then((r) => {
             
-            Cycles.SkyBox.init();
+            SkyBox.init();
 
-            Cycles.WebGPURenderer.createPipelines().then(()=>{
+            WebGPURenderer.createPipelines().then(()=>{
                 loadScript( 0 );
             })
         });

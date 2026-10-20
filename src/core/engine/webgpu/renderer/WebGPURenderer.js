@@ -49,8 +49,7 @@ class WebGPURenderer {
         cullModeType: this.ENUM_CONFIG.cullModeType[0],
     }
 
-        
-
+    static renderQueue;
 
     static shaderCode = {
         default: null,
