@@ -1,4 +1,4 @@
-import { Node, View, Camera, Plane, Cube, CoordinateSystem, GLTFLoader, MeshRenderer, WebGPURenderer } from "@cycles/core";
+import { Node, View, Camera, Plane, Cube, CoordinateSystem, GLTFLoader, Mesh, MeshRenderer, WebGPURenderer } from "@cycles/core";
 import { Input } from "@cycles/input"
 
 class Sample {
@@ -34,7 +34,7 @@ class Sample {
         node1.position.set(0, 1.2, 0); // camera orbit node
         node1.rotation.set(0, 0, 0);
         node2.position.set(0, 0, 2); // camera
-        node3.position.set(0, 0, 0);
+        node3.position.set(0, 1, 0);
         node4.rotation.set(0, 0, 0);
 
         node6.position.set(0, 0, 1); // camera
@@ -74,17 +74,27 @@ class Sample {
         xyz.setShape(20,20,0,20,20)
         xyz.updateAttribute();
 
+        const vrms = [
+            '../assets/vrm/ly.vrm',
+            '../assets/vrm/alxy_yz.vrm',
+            '../assets/vrm/brny.vrm'
+        ]
         const gltfloader = new GLTFLoader()
-        let vrm = await gltfloader.load('../assets/vrm/ly.vrm',( model ) => {
-            console.log('call');
-        })
-        console.log(vrm.gltf.materials[5])
+        let vrm = await gltfloader.load( vrms[ 0 ],( model ) => {
+            for (let i = 0; i < model.images.length; i++ ) {
+                WebGPURenderer.writeTexture( model.images[i], i );
+            }
 
-        // const mesh = new Mesh();
-        // mesh.geometry = model;
-        // console.log(mesh,model)
+            for ( let mat of model.gltf.materials ) {
+                const material = new
+            }
+        })
+        console.log(vrm)
 
         const renderer = new MeshRenderer();
+        const mesh = new Mesh();
+        mesh.geometry = cube;
+        // console.log(mesh,model)
         WebGPURenderer._set();
 
         let frameCount = 0;
@@ -122,34 +132,34 @@ class Sample {
                 }
             );
 
-            // renderer.drawMesh( model.mesh, view, node0 )
+            renderer.drawMesh( mesh, view, node0 )
 
             view.end();
 
-            view_ui.createLoadRenderPass();
+            // view_ui.createLoadRenderPass();
 
-            i = 6;
-            WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
-                [
-                    1, 8, 3, 3
-                ]
-            ));
-            WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
-                [
-                    200/4096, 200/4096, 1220/4096, 2/4096
-                ]
-            ));
-            view_ui.drawGeometry(
-                WebGPURenderer.Pipelinelist.UI,
-                sprite,
-                {
-                    offset: 256*i,
-                },
-                {
+            // i = 6;
+            // WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
+            //     [
+            //         1, 8, 3, 3
+            //     ]
+            // ));
+            // WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
+            //     [
+            //         200/4096, 200/4096, 1220/4096, 2/4096
+            //     ]
+            // ));
+            // view_ui.drawGeometry(
+            //     WebGPURenderer.Pipelinelist.UI,
+            //     sprite,
+            //     {
+            //         offset: 256*i,
+            //     },
+            //     {
 
-                }
-            );
-            view_ui.end();
+            //     }
+            // );
+            // view_ui.end();
 
             View.submitCommandEncoder();
         }

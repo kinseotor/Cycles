@@ -5,6 +5,7 @@ import {
     Loader,
     RenderPipeline,
     SkyBox,
+    Material
 } from "../../../../Module.js";
 
 /**
@@ -38,8 +39,10 @@ class WebGPURenderer {
 
     static config = {
         sampleCount: 4,
+        TextureSize: 4096,
         DynamicOffset_SLOT_SIZE: 256, // ≥ minUniformBufferOffsetAlignment
-        RENDER_STRUCT_COUNT: 4 * 4 *2,
+        DynamicOffset: 4 * 4,
+        DynamicOffset_Material: 4 * 51,
         DRAW_CALL_COUNT: 100,
         DRAW_CALL_INDEX: 0,
 
@@ -280,7 +283,7 @@ class WebGPURenderer {
                         type:"uniform",
                         dynamic: true,
                         hasDynamicOffset: true,
-                        minBindingSize: WebGPURenderer.config.RENDER_STRUCT_COUNT,   // 告诉 GPU 每个槽位至少读 16 字节
+                        minBindingSize: WebGPURenderer.config.DynamicOffset_Material,   // 告诉 GPU 每个槽位至少读 16 字节
                     }
                 },
                 {
@@ -330,11 +333,30 @@ class WebGPURenderer {
                         viewDimension:"2d-array"
                     }
                 },
+                {
+                    binding:2,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type:"read-only-storage"
+                    }
+                },
             ]
         });
     }
 
     static initDataResource() {
+        this.Resource.Uniform.DynamicOffset_vertex = this.device.createBuffer({
+            label: 'ubo-dynamic',
+            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+        
+        this.Resource.Uniform.DynamicOffset_fragment = this.device.createBuffer({
+            label: 'ubo-dynamic',
+            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
         // @group(1) @binding(0)
         this.Resource.Samplers.baseColor = this.device.createSampler({
             magFilter: 'linear',
@@ -355,7 +377,7 @@ class WebGPURenderer {
                 height: Texture2D.defaultHeight,
                 depthOrArrayLayers: Texture2D.defaultDepth
             },
-            arrayLayerCount: Texture2D.defaultDepth,  // 这个可以保留作为冗余说明
+            arrayLayerCount: Texture2D.defaultDepth,
             
             usage: GPUTextureUsage.TEXTURE_BINDING | 
                 GPUTextureUsage.COPY_DST | 
@@ -370,33 +392,47 @@ class WebGPURenderer {
             baseMipLevel: 0
         });
 
-        this.Resource.Uniform.DynamicOffset_vertex = this.device.createBuffer({
-            label: 'ubo-dynamic',
-            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        this.textureDataArray = new Float32Array(8*32).fill(0.0);
+        this.Resource.StorageBuffers.textureDataArray = this.device.createBuffer({
+            size: 8 * 32 * 4,
+            usage: 
+                GPUBufferUsage.STORAGE |
+                GPUBufferUsage.COPY_DST |
+                GPUBufferUsage.COPY_SRC,
+            mappedAtCreation: false,
         });
-        
-        this.Resource.Uniform.DynamicOffset_fragment = this.device.createBuffer({
-            label: 'ubo-dynamic',
-            size: WebGPURenderer.config.DynamicOffset_SLOT_SIZE * WebGPURenderer.config.DRAW_CALL_COUNT,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        WebGPURenderer.device.queue.writeBuffer(
+            this.Resource.StorageBuffers.textureDataArray,
+            0,
+            this.textureDataArray
+        )
     }
 
-    static writeTexture( imageBitmap, index = 0, x = 0, y = 0 ) {
+    static writeTexture( source, z = 0, x = 0, y = 0, flipY = false ) {
         WebGPURenderer.device.queue.copyExternalImageToTexture(
-            { source: imageBitmap, flipY: false },
+            { source: source, flipY: flipY },
             {
                 texture: this.Resource.Texture.Texture2DArray,
                 mipLevel: 0,
-                origin: { x: x, y: y, z: index }, // z = array layer
+                origin: { x: x, y: y, z: z },
             },
             {
-                width: imageBitmap.width,
-                height: imageBitmap.height,
+                width: source.width,
+                height: source.height,
                 depthOrArrayLayers: 1
             }
         );
+        this.textureDataArray[4 * 8 * z] = z;
+        this.textureDataArray[4 * 8 * z + 4] = x;
+        this.textureDataArray[4 * 8 * z + 5] = y;
+        this.textureDataArray[4 * 8 * z + 6] = source.width/WebGPURenderer.config.TextureSize;
+        this.textureDataArray[4 * 8 * z + 7] = source.height/WebGPURenderer.config.TextureSize;
+
+        WebGPURenderer.device.queue.writeBuffer(
+            this.Resource.StorageBuffers.textureDataArray,
+            4 * 8 * z,
+            new Float32Array([z,0,0,0,x,y,source.width/WebGPURenderer.config.TextureSize,source.height/WebGPURenderer.config.TextureSize])
+        )
     }
 
     static updateDataResource() {
@@ -502,6 +538,12 @@ class WebGPURenderer {
                         binding: 1,
                         resource: this.Resource.TextureViews.Texture2DArray,
                     },
+                    {
+                        binding: 2,
+                        resource: {
+                            buffer: this.Resource.StorageBuffers.textureDataArray,
+                        }
+                    },
                 ]
             });
             this.status.updateBindGroup[2] = false;
@@ -530,14 +572,14 @@ class WebGPURenderer {
         var i = 0;
         WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
             [
-                0, 0, 0, 0
+                0, 3, 6, 0
             ]
         ));
-        WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
-        [
-            2048/4096, 2048/4096, 0/4096, 0/4096
-        ]
-    ));
+        const mat = new Material();
+        mat.pbr_baseColorTexture.x = 0
+        WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_fragment, 256*i, new Float32Array(
+            mat.toArray()
+        ));
     }
 
     static drawMesh( mesh, view, node ) {

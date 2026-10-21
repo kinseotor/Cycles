@@ -15,6 +15,16 @@ class Mesh {
 
     set geometry(geometry) {
         this._geometry = geometry;
+        this.childrenMeshList.length = 0;
+        this.childrenMeshList.push(new childrenMesh({
+            property: {
+                indexCount: geometry.attribute.indices.length,
+                firstIndex: 0
+            },
+            status: {
+                visibility: true,
+            }
+        }));
     }
 
     get geometry() {

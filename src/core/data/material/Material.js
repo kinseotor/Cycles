@@ -1,57 +1,131 @@
 import { DataBase, Vector4, Vector3, Vector2, Vector1, WebGPURenderer } from "../../../Module.js"
 
-class Material extends DataBase{
+class Material {
     DATA_TYPE = 'Material';
 
-    constructor() {
-        super();
-        this._type = 'BasicMaterial';
-        this.arrayBuffer = new ArrayBuffer(256);
-        this.f32 = new Float32Array( this.arrayBuffer );
-        this.u32 = new Uint32Array( this.arrayBuffer );
-        this.i32 = new Int32Array( this.arrayBuffer );
-
-        this.Property = {
-            // ========= glTF PBR 标准【通用段】=========
-            baseColorFactor: new Vector4(1, 1, 1, 1),        // 基础颜色 RGBA
-            emissiveFactor: new Vector4(0, 0, 0, 1),         // 自发光 RGB,A占位
-
-            metallicFactor: new Vector1(0),
-            roughnessFactor: new Vector1(1),
-            alphaMode: new Vector1(0),                       // 0:OPAQUE,1:MASK,2:BLEND
-            alphaCutoff: new Vector1(0.5),
-            doubleSided: new Vector1(0),                     // 0=false,1=true
-
-            // 纹理索引，-1代表无贴图
-            baseColorTexture: new Vector1(-1),
-            emissiveTexture: new Vector1(-1),
-            normalTexture: new Vector1(-1),
-            metallicRoughnessTexture: new Vector1(-1),
-            occlusionTexture: new Vector1(-1),
-
-            // ========= VRM MToon 扩展段【卡通专用】=========
-            shadeColorFactor: new Vector4(0.5, 0.5, 0.5, 1), // 阴影色
-            shadeColorTexture: new Vector1(-1),
-            toony: new Vector1(0.9),                         // 卡通硬边强度 0~1
-            shadingShift: new Vector1(0),                    // 阴影偏移
-
-            rimColorFactor: new Vector4(0, 0, 0, 1),         // 轮廓光颜色
-            rimTexture: new Vector1(-1),
-
-            edgeColor: new Vector4(0, 0, 0, 1),              // 描边颜色
-            edgeSize: new Vector1(0),                        // 描边宽度，0=关闭描边
-            outlineMode: new Vector1(0),                     // 0:屏幕空间,1:世界空间
-
-            // ========= Blinn-Phong / 冯氏光照扩展【老模型兼容】=========
-            phongAmbientColor: new Vector4(0.2, 0.2, 0.2, 1),   // 材质环境色
-            phongDiffuseColor: new Vector4(1, 1, 1, 1),         // 漫反射颜色
-            phongSpecularColor: new Vector4(1, 1, 1, 1),        // 镜面高光颜色
-            phongShininess: new Vector1(32),                    // 高光幂
-            phongDiffuseTexture: new Vector1(-1),               // 漫反射贴图索引
-            phongSpecularTexture: new Vector1(-1),              // 高光贴图索引
-        }
-
+    constructor( config = {} ) {
         
+        // ========= glTF PBR 材质 =========
+        this.pbr_baseColorFactor = new Vector4(1, 1, 1, 1);
+        this.pbr_emissiveFactor = new Vector4(0, 0, 0, 1);
+        this.pbr_metallicFactor = new Vector1(0);
+        this.pbr_roughnessFactor = new Vector1(1);
+        this.pbr_alphaMode = new Vector1(0);    // 0:OPAQUE,1:MASK,2:BLEND
+        this.pbr_alphaCutoff = new Vector1(0.5);
+        this.pbr_doubleSided = new Vector1(0);  // 0 false, 1 true
+
+        this.pbr_baseColorTexture = new Vector1(-1);
+        this.pbr_emissiveTexture = new Vector1(-1);
+        this.pbr_normalTexture = new Vector1(-1);
+        this.pbr_metallicRoughnessTexture = new Vector1(-1);
+        this.pbr_occlusionTexture = new Vector1(-1);
+
+        // ========= VRM MToon 卡通材质 =========
+        this.mtoon_shadeColorFactor = new Vector4(0.8, 0.8, 0.8, 1);
+        this.mtoon_shadeColorTexture = new Vector1(-1);
+        this.mtoon_toony = new Vector1(0.6);
+        this.mtoon_shadingShift = new Vector1(0);
+        this.mtoon_rimColorFactor = new Vector4(0, 0, 0, 1);
+        this.mtoon_rimTexture = new Vector1(-1);
+        this.mtoon_edgeColor = new Vector4(0,0,0,1);
+        this.mtoon_edgeSize = new Vector1(0);       // 0关闭描边
+        this.mtoon_outlineMode = new Vector1(0);    // 0屏幕空间 1世界空间
+
+        // ========= Blinn-Phong 兼容材质 =========
+        this.phong_ambientColor = new Vector4(0.2,0.2,0.2,1);
+        this.phong_diffuseColor = new Vector4(1,1,1,1);
+        this.phong_specularColor = new Vector4(1,1,1,1);
+        this.phong_shininess = new Vector1(16);
+        this.phong_diffuseTexture = new Vector1(-1);
+        this.phong_specularTexture = new Vector1(-1);
+    }
+
+    /**
+     * 把整个结构平坦展开成 Float32Array，直接 writeBuffer 上传 SSBO
+     * 顺序严格和WGSL结构体保持一致
+     * @returns {Float32Array}
+     */
+    toArray() {
+        const arr = [];
+        // PBR
+        arr.push(...this.pbr_baseColorFactor.toArray());
+        arr.push(...this.pbr_emissiveFactor.toArray());
+        arr.push(this.pbr_metallicFactor.x);
+        arr.push(this.pbr_roughnessFactor.x);
+        arr.push(this.pbr_alphaMode.x);
+        arr.push(this.pbr_alphaCutoff.x);
+        arr.push(this.pbr_doubleSided.x);
+
+        arr.push(this.pbr_baseColorTexture.x);
+        arr.push(this.pbr_emissiveTexture.x);
+        arr.push(this.pbr_normalTexture.x);
+        arr.push(this.pbr_metallicRoughnessTexture.x);
+        arr.push(this.pbr_occlusionTexture.x);
+
+        // MToon
+        arr.push(...this.mtoon_shadeColorFactor.toArray());
+        arr.push(this.mtoon_shadeColorTexture.x);
+        arr.push(this.mtoon_toony.x);
+        arr.push(this.mtoon_shadingShift.x);
+        arr.push(...this.mtoon_rimColorFactor.toArray());
+        arr.push(this.mtoon_rimTexture.x);
+        arr.push(...this.mtoon_edgeColor.toArray());
+        arr.push(this.mtoon_edgeSize.x);
+        arr.push(this.mtoon_outlineMode.x);
+
+        // Phong
+        arr.push(...this.phong_ambientColor.toArray());
+        arr.push(...this.phong_diffuseColor.toArray());
+        arr.push(...this.phong_specularColor.toArray());
+        arr.push(this.phong_shininess.x);
+        arr.push(this.phong_diffuseTexture.x);
+        arr.push(this.phong_specularTexture.x);
+
+        return new Float32Array(arr);
+    }
+
+    /**
+     * 从平坦Float32数组反向回写，用于缓存/调试
+     * @param {Float32Array} buffer
+     */
+    fromArray(buffer) {
+        let p = 0;
+        const read4 = () => [buffer[p++], buffer[p++], buffer[p++], buffer[p++]];
+        const read1 = () => buffer[p++];
+
+        // PBR
+        this.pbr_baseColorFactor.set(...read4());
+        this.pbr_emissiveFactor.set(...read4());
+        this.pbr_metallicFactor.set(read1());
+        this.pbr_roughnessFactor.set(read1());
+        this.pbr_alphaMode.set(read1());
+        this.pbr_alphaCutoff.set(read1());
+        this.pbr_doubleSided.set(read1());
+
+        this.pbr_baseColorTexture.set(read1());
+        this.pbr_emissiveTexture.set(read1());
+        this.pbr_normalTexture.set(read1());
+        this.pbr_metallicRoughnessTexture.set(read1());
+        this.pbr_occlusionTexture.set(read1());
+
+        // MToon
+        this.mtoon_shadeColorFactor.set(...read4());
+        this.mtoon_shadeColorTexture.set(read1());
+        this.mtoon_toony.set(read1());
+        this.mtoon_shadingShift.set(read1());
+        this.mtoon_rimColorFactor.set(...read4());
+        this.mtoon_rimTexture.set(read1());
+        this.mtoon_edgeColor.set(...read4());
+        this.mtoon_edgeSize.set(read1());
+        this.mtoon_outlineMode.set(read1());
+
+        // Phong
+        this.phong_ambientColor.set(...read4());
+        this.phong_diffuseColor.set(...read4());
+        this.phong_specularColor.set(...read4());
+        this.phong_shininess.set(read1());
+        this.phong_diffuseTexture.set(read1());
+        this.phong_specularTexture.set(read1());
     }
 
     getBaseData() {
@@ -72,67 +146,4 @@ class Material extends DataBase{
     */
 }
 
-// console.log( new Material.Basic() )
-/*
-const ab = new ArrayBuffer(256);
-    const f32 = new Float32Array(ab);
-    const u32 = new Uint32Array(ab);
-    const i32 = new Int32Array(ab);
-
-    let floatList = [];
-    let intList = [];
-
-    // =========【1. 按WGSL结构体顺序遍历，收集（分组收集，不打乱顺序）】=========
-    // 通用段
-    floatList.push(...mat.baseColorFactor);
-    floatList.push(mat.metallicFactor, mat.roughnessFactor);
-    floatList.push(...mat.emissiveFactor, 0); // vec3 uniform补齐第4个padding
-    intList.push({type:'u32', value: mat.alphaMode});
-    floatList.push(mat.alphaCutoff);
-    intList.push({type:'u32', value: mat.doubleSided});
-
-    intList.push({type:'i32', value: mat.baseColorTexture});
-    intList.push({type:'i32', value: mat.metallicRoughnessTexture});
-    intList.push({type:'i32', value: mat.normalTexture});
-    intList.push({type:'i32', value: mat.occlusionTexture});
-    intList.push({type:'i32', value: mat.emissiveTexture});
-
-    // 扩展段
-    floatList.push(...mat.ambient, 0); // vec3补padding
-    floatList.push(...mat.specular, 0); // vec3补padding
-    floatList.push(mat.specularFactor);
-
-    floatList.push(...mat.edgeColor);
-    floatList.push(mat.edgeSize);
-
-    intList.push({type:'i32', value: mat.toonTexture});
-    intList.push({type:'i32', value: mat.sphereIndex});
-    intList.push({type:'u32', value: mat.sphereMode});
-    intList.push({type:'u32', value: mat.drawFlag});
-
-    floatList.push(mat.pad0, mat.pad1, mat.pad2, mat.pad3);
-
-    // =========【2. 回放写入内存，严格顺序】=========
-    let fPtr = 0;
-    let iPtr = 0;
-    let bytePtr = 0;
-    while(fPtr < floatList.length || iPtr < intList.length){
-        if(bytePtr < fPtr * 4){
-            // 当前位置是浮点数
-            f32[bytePtr / 4] = floatList[fPtr];
-            fPtr++;
-            bytePtr += 4;
-        }else{
-            // 当前位置是整数
-            const item = intList[iPtr];
-            if(item.type === 'u32'){
-                u32[bytePtr /4] = item.value;
-            }else{
-                i32[bytePtr /4] = item.value;
-            }
-            iPtr++;
-            bytePtr +=4;
-        }
-    }
-*/
 export { Material }

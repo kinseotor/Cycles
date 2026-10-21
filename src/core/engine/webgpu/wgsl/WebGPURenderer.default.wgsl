@@ -13,79 +13,76 @@ struct Varying_VertexUvNormal {
     @location(2) fragmentPos: vec3<f32>,
 };
 
-struct TextureParameter {
+struct TextureData {
     location: f32,
     rotated: f32,
     _pad0: f32,
     _pad1: f32,
-    size: vec2<f32>,
     position: vec2<f32>,
+    size: vec2<f32>,
 }
 
-struct DynamicOffset_MaterialProperty {
-    // ========= glTF PBR 标准【通用段】=========
-    baseColorFactor: vec4<f32>,          // 基础颜色 RGBA
-    emissiveFactor: vec4<f32>,           // 自发光 RGB,A占位
-    metallicFactor: f32,
-    roughnessFactor: f32,
-    alphaMode: f32,                      // 0:OPAQUE,1:MASK,2:BLEND
-    alphaCutoff: f32,
-    doubleSided: f32,                    // 0=false,1=true
-    // 纹理索引，-1代表无贴图
-    baseColorTexture: f32,
-    emissiveTexture: f32,
-    normalTexture: f32,
-    metallicRoughnessTexture: f32,
-    occlusionTexture: f32,
+struct DynamicOffset_Material { // size 51 * 4
+    // ========= glTF PBR 材质 =========
+    pbr_baseColorFactor: vec4<f32>,
+    pbr_emissiveFactor: vec4<f32>,
+    pbr_metallicFactor: f32,
+    pbr_roughnessFactor: f32,
+    pbr_alphaMode: f32,
+    pbr_alphaCutoff: f32,
+    pbr_doubleSided: f32,
 
-    // ========= VRM MToon 扩展段【卡通专用】=========
-    shadeColorFactor: vec4<f32>,         // 阴影色
-    shadeColorTexture: f32,
-    toony: f32,                          // 卡通硬边强度 0~1
-    shadingShift: f32,                   // 阴影偏移
-    rimColorFactor: vec4<f32>,           // 轮廓光颜色
-    rimTexture: f32,
-    edgeColor: vec4<f32>,                // 描边颜色
-    edgeSize: f32,                       // 描边宽度，0=关闭描边
-    outlineMode: f32,                    // 0:屏幕空间,1:世界空间
+    pbr_baseColorTexture: f32,
+    pbr_emissiveTexture: f32,
+    pbr_normalTexture: f32,
+    pbr_metallicRoughnessTexture: f32,
+    pbr_occlusionTexture: f32,
 
-    // ========= Blinn-Phong / 冯氏光照扩展【老模型兼容】=========
-    phongAmbientColor: vec4<f32>,         // 材质环境色
-    phongDiffuseColor: vec4<f32>,         // 漫反射颜色
-    phongSpecularColor: vec4<f32>,        // 镜面高光颜色
-    phongShininess: f32,                  // 高光幂
-    phongDiffuseTexture: f32,             // 漫反射贴图索引
-    phongSpecularTexture: f32,            // 高光贴图索引
+    // ========= VRM MToon 卡通材质 =========
+    mtoon_shadeColorFactor: vec4<f32>,
+    mtoon_shadeColorTexture: f32,
+    mtoon_toony: f32,
+    mtoon_shadingShift: f32,
+    mtoon_rimColorFactor: vec4<f32>,
+    mtoon_rimTexture: f32,
+    mtoon_edgeColor: vec4<f32>,
+    mtoon_edgeSize: f32,
+    mtoon_outlineMode: f32,
+
+    // ========= Blinn-Phong 兼容材质 =========
+    phong_ambientColor: vec4<f32>,
+    phong_diffuseColor: vec4<f32>,
+    phong_specularColor: vec4<f32>,
+    phong_shininess: f32,
+    phong_diffuseTexture: f32,
+    phong_specularTexture: f32,
 };
+
 
 struct DynamicOffset {
     index_cameraViewMatrix:u32,
     index_worldMatrix:u32,
     index_useTexture:u32,
-    padding1:u32,
-    width: f32,
-    height: f32,
-    offsetX: f32,
-    offsetY: f32,
+    padding1:u32
 }
 
 // ---------------------------------------------------------
 
 // @group(0)
 @group(0) @binding(0) var<uniform> dynamicOffset_vertex: DynamicOffset;
-@group(0) @binding(1) var<uniform> dynamicOffset_fragment: DynamicOffset_MaterialProperty;
+@group(0) @binding(1) var<uniform> dynamicOffset_fragment: DynamicOffset_Material;
 // @group(1)
 @group(1) @binding(0) var<storage, read> worldMatrix4x4Array: array<mat4x4<f32>>;
 @group(1) @binding(1) var<storage, read> cameraViewMatrix4x4: array<mat4x4<f32>>;
 // @group(2)
 @group(2) @binding(0) var baseColorSampler: sampler;
 @group(2) @binding(1) var baseColorTexture: texture_2d_array<f32>;
-@group(2) @binding(2) var<storage, read> textureParameterArray: array<TextureParameter>;
+@group(2) @binding(2) var<storage, read> textureDataArray: array<TextureData>;
 
 // @group(3)
 // @group(3) @binding(0) var<uniform> u : Uniforms;
 
-// ---------------------------------------------------------
+// pbr ---------------------------------------------------------
 
 @vertex
 fn vs_VertexUvNormal(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
@@ -102,19 +99,21 @@ fn vs_VertexUvNormal(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
 @fragment
 fn fs_BasicMaterial(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
 
-    var bs:vec4<f32> = dynamicOffset_fragment.baseColorFactor;
+    var bs:vec4<f32> = dynamicOffset_fragment.pbr_baseColorFactor;
+
+    var i = u32(dynamicOffset_fragment.pbr_baseColorTexture);
 
     var tex:vec4<f32> = textureSample(
         baseColorTexture,
         baseColorSampler,
-        vec2(input.uvs.x*dynamicOffset_vertex.width + dynamicOffset_vertex.offsetX,input.uvs.y*dynamicOffset_vertex.height + dynamicOffset_vertex.offsetY),
-        u32(dynamicOffset_vertex.index_useTexture)
+        vec2( input.uvs.x * textureDataArray[i].size.x + textureDataArray[i].position.x, input.uvs.y * textureDataArray[i].size.y + textureDataArray[i].position.y),
+        i
     );
 
     return tex;
 }
 
-// ---------------------------------------------------------
+// line ---------------------------------------------------------
 
 @vertex
 fn vs_Line(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
@@ -125,8 +124,7 @@ fn vs_Line(input: Input_VertexUvNormal) -> Varying_VertexUvNormal{
 
 @fragment
 fn fs_Line(input: Varying_VertexUvNormal) -> @location(0) vec4<f32> {
-    var bs:vec4<f32> = dynamicOffset_fragment.baseColorFactor;
-    return vec4<f32>(1,1,1,1);
+    return vec4<f32>(1,1,1,0.3);
 }
 
 // ---------------------------------------------------------

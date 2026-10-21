@@ -67,11 +67,11 @@ class GLTFLoader {
             dataView.getUint8(offset++), dataView.getUint8(offset++),
             dataView.getUint8(offset++), dataView.getUint8(offset++)
         );
-        if (model.magic !== 'glTF') throw new Error('不是有效的 GLB 文件');
+        if (model.magic !== 'glTF') throw new Error('Not a valid GLB file');
 
         model.version = dataView.getUint32(offset, true); offset += 4;
         model.length  = dataView.getUint32(offset, true); offset += 4;
-        if (model.version !== 2) throw new Error('仅支持 glTF 2.0');
+        if (model.version !== 2) throw new Error('Only supports GLTF 2.0');
 
         model.jsonChunkLength = dataView.getUint32(offset, true); offset += 4;
         model.jsonChunkType   = dataView.getUint32(offset, true); offset += 4;
@@ -89,7 +89,8 @@ class GLTFLoader {
             }
         }
 
-        this.parseGLTF(model.gltf, model.bin)
+        const result = await this.parseGLTF(model.gltf, model.bin);
+        model.images = result.images
 
         return model;
     }
@@ -116,11 +117,42 @@ class GLTFLoader {
                 const vertexCount = gltf.accessors[attrs.POSITION].count;
             }
         }
-
         const images = await this.parseImages( gltf, bin );
         const textures = this.parseTextures( gltf );
-        // console.log(images)
+        return { images }
     }
+
+    getReferenceImageIndexArray(gltf) {
+        const set = new Set();
+        const addTex = (texInfo) => {
+            if (texInfo?.index !== undefined) {
+                set.add(texInfo.index);
+            }
+        };
+
+        for (const mat of gltf.materials) {
+            const mtoon = mat.extensions?.VRMC_materials_mtoon;
+            if (mtoon) {
+                addTex(mtoon.baseColorTexture);
+                addTex(mtoon.shadeMultiplyTexture);
+                addTex(mtoon.normalTexture);
+                addTex(mtoon.emissiveTexture);
+                addTex(mtoon.matcapTexture);
+                continue;
+            }
+
+            const pbr = mat.pbrMetallicRoughness;
+            if (pbr) {
+                addTex(pbr.baseColorTexture);
+                addTex(pbr.metallicRoughnessTexture);
+            }
+            addTex(mat.normalTexture);
+            addTex(mat.occlusionTexture);
+            addTex(mat.emissiveTexture);
+        }
+        return Array.from(set);
+    }
+
 
     readAccessor( accessorIndex, gltf, bin ) {
         const accessor = gltf.accessors[accessorIndex];
@@ -148,8 +180,9 @@ class GLTFLoader {
 
     async parseImages( gltf, bin ) {
         const images = [];
-
-        for (const img of gltf.images ?? []) {
+        
+        for ( const i of this.getReferenceImageIndexArray(gltf) ?? []) {
+            let img = gltf.images[i]
             let blob;
 
             if (img.bufferView !== undefined) {
