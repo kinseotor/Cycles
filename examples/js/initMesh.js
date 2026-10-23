@@ -1,4 +1,4 @@
-import { Node, View, Camera, Plane, Cube, CoordinateSystem, GLTFLoader, Mesh, MeshRenderer, WebGPURenderer } from "@cycles/core";
+import { Node, View, Camera, Plane, Cube, CoordinateSystem, GLTFLoader, Material, Geometry, Mesh, MeshRenderer, WebGPURenderer } from "@cycles/core";
 import { Input } from "@cycles/input"
 
 class Sample {
@@ -33,8 +33,8 @@ class Sample {
         node0.position.set(0, 0, 0);
         node1.position.set(0, 1.2, 0); // camera orbit node
         node1.rotation.set(0, 0, 0);
-        node2.position.set(0, 0, 2); // camera
-        node3.position.set(0, 1, 0);
+        node2.position.set(0, 0, 10); // camera
+        node3.position.set(0, 0, 0);
         node4.rotation.set(0, 0, 0);
 
         node6.position.set(0, 0, 1); // camera
@@ -79,17 +79,33 @@ class Sample {
             '../assets/vrm/alxy_yz.vrm',
             '../assets/vrm/brny.vrm'
         ]
-        const gltfloader = new GLTFLoader()
-        let vrm = await gltfloader.load( vrms[ 0 ],( model ) => {
+        const gltfloader = new GLTFLoader();
+        const meshes = [];
+        let vrm = await gltfloader.load( vrms[ 2 ],( model ) => {
             for (let i = 0; i < model.images.length; i++ ) {
                 WebGPURenderer.writeTexture( model.images[i], i );
             }
 
+            let materials = [];
             for ( let mat of model.gltf.materials ) {
-                const material = new
+                const material = MeshRenderer.createMaterial();
+                materials.push( material );
+            }
+
+            let ai = 0;
+            for ( let mesh of model.gltf.meshes) {
+                for (let element of mesh.primitives) {
+                    const mesh = new Mesh();
+                    const geometry = new Geometry();
+                    geometry.attribute = model.attributes[ai];
+                    mesh.geometry = geometry;
+                    meshes.push(mesh)
+                    ai ++;
+                }
             }
         })
-        console.log(vrm)
+        console.log(vrm.gltf)
+        console.log(meshes)
 
         const renderer = new MeshRenderer();
         const mesh = new Mesh();
@@ -99,7 +115,6 @@ class Sample {
 
         let frameCount = 0;
         function render() {
-            // node1.rotation.y = frameCount/10;
             frameCount++;
             Node.recursionRootNode(node0, Node.updateNodeWorldMatrix4x4);
             Node.recursionRootNode(node5, Node.updateNodeWorldMatrix4x4);
@@ -110,56 +125,11 @@ class Sample {
             View.clearColor(canvas);
             view.createLoadRenderPass();
             
-            var i = 5;
-            WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
-                [
-                    0, 4, 3, 3
-                ]
-            ));
-            WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
-                [
-                    1, 1, 0, 0
-                ]
-            ));
-            view.drawGeometry(
-                WebGPURenderer.Pipelinelist.Line,
-                xyz,
-                {
-                    offset: 256*i,
-                },
-                {
-
-                }
-            );
-
-            renderer.drawMesh( mesh, view, node0 )
+            for (let m of meshes) {
+                renderer.drawMesh( m, view, node0 )
+            }
 
             view.end();
-
-            // view_ui.createLoadRenderPass();
-
-            // i = 6;
-            // WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
-            //     [
-            //         1, 8, 3, 3
-            //     ]
-            // ));
-            // WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i+16, new Float32Array(
-            //     [
-            //         200/4096, 200/4096, 1220/4096, 2/4096
-            //     ]
-            // ));
-            // view_ui.drawGeometry(
-            //     WebGPURenderer.Pipelinelist.UI,
-            //     sprite,
-            //     {
-            //         offset: 256*i,
-            //     },
-            //     {
-
-            //     }
-            // );
-            // view_ui.end();
 
             View.submitCommandEncoder();
         }

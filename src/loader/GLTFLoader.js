@@ -1,5 +1,3 @@
-import { SkinGeometry } from '../Module.js'
-
 class GLTFLoader {
 
     static COMPONENT_TYPE = {
@@ -90,36 +88,42 @@ class GLTFLoader {
         }
 
         const result = await this.parseGLTF(model.gltf, model.bin);
-        model.images = result.images
+        model.images = result.images;
+        model.attributes = result.attributes;
 
         return model;
     }
 
     async parseGLTF( gltf, bin ) {
+        const attributes = [];
         for (const mesh of gltf.meshes) {
             for (const primitive of mesh.primitives) {
                 
                 const attrs = primitive.attributes;
 
-                const positions = this.readAccessor( attrs.POSITION, gltf, bin );
-                const normals   = attrs.NORMAL  ? this.readAccessor(attrs.NORMAL, gltf, bin )  : null;
-                const uvs       = attrs.TEXCOORD_0 ? this.readAccessor(attrs.TEXCOORD_0, gltf, bin ) : null;
+                const attribute = {};
+
+                attribute.vertices = this.readAccessor( attrs.POSITION, gltf, bin );
+                attribute.normals   = attrs.NORMAL  ? this.readAccessor(attrs.NORMAL, gltf, bin )  : null;
+                attribute.uvs       = attrs.TEXCOORD_0 ? this.readAccessor(attrs.TEXCOORD_0, gltf, bin ) : null;
                 // const colors    = attrs.COLOR_0 ? this.readAccessor(attrs.COLOR_0, gltf, bin ) : null;
 
                 // 蒙皮数据（VRM 一定有）
                 // const joints  = attrs.JOINTS_0  ? this.readAccessor(attrs.JOINTS_0, gltf, bin )  : null; // 每顶点 4 个关节索引
                 // const weights = attrs.WEIGHTS_0 ? this.readAccessor(attrs.WEIGHTS_0, gltf, bin ) : null; // 对应的权重
 
-                const indices = primitive.indices !== undefined
+                attribute.indices = primitive.indices !== undefined
                     ? this.readAccessor(primitive.indices, gltf, bin )
                 : null; // 没有 indices 时按顺序绘制
+
+                attributes.push(attribute);
 
                 const vertexCount = gltf.accessors[attrs.POSITION].count;
             }
         }
         const images = await this.parseImages( gltf, bin );
         const textures = this.parseTextures( gltf );
-        return { images }
+        return { images, attributes }
     }
 
     getReferenceImageIndexArray(gltf) {

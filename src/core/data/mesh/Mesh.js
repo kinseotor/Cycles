@@ -85,7 +85,9 @@ class childrenMesh {
         this._material = material;
     }
 
-
+    get material() {
+        return this._material;
+    }
 }
 
 export { Mesh, childrenMesh }

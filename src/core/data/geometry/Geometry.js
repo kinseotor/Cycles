@@ -29,7 +29,6 @@ class Geometry {
             topology: 'triangle-list',
             cullMode: 'back',
         }
-        this.Materials = []
 
     }
     get type(){

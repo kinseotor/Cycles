@@ -572,7 +572,7 @@ class WebGPURenderer {
         var i = 0;
         WebGPURenderer.device.queue.writeBuffer(WebGPURenderer.Resource.Uniform.DynamicOffset_vertex, 256*i, new Uint32Array(
             [
-                0, 3, 6, 0
+                0, 3, 0, 0
             ]
         ));
         const mat = new Material();

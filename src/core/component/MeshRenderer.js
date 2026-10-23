@@ -1,4 +1,4 @@
-import { WebGPURenderer, Mesh, childrenMesh } from "../../Module.js";
+import { WebGPURenderer, Material, Mesh, childrenMesh } from "../../Module.js";
 
 /**
  * 静态网格渲染器。
@@ -15,6 +15,14 @@ class MeshRenderer {
 
     drawMesh( mesh, view, node ) {
         if (MeshRenderer.status.useWebGPU) WebGPURenderer.drawMesh( mesh, view, node )
+    }
+
+    static Materiallist = [];
+
+    static createMaterial( config = {} ) {
+        const material = new Material();
+        this.Materiallist.push( material );
+        return material;
     }
 }
 

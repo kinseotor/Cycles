@@ -20,7 +20,7 @@ import { Texture2D } from './core/data/Texture/Texture2D.js'
 import { Cube, Plane, Sphere, CoordinateSystem, Geometry, SkinGeometry } from './core/data/geometry/Geometry.js'
 
 import { Node } from './core/node/Node.js'
-import { Scene } from './core/world/Scene.js'
+import { Scene } from './core/scene/Scene.js'
 import { Engine } from './core/engine/Engine.js'
 import { WebGPU } from './core/engine/webgpu/WebGPU.js'
 import { WebGPURenderer } from './core/engine/webgpu/renderer/WebGPURenderer.js'
